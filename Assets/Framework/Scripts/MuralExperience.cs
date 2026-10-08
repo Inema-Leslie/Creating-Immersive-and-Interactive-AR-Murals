@@ -69,6 +69,25 @@ public class MuralExperience : MonoBehaviour
         OnTrackingLost();
     }
 
+    // Editor testing without a phone: in Play mode, use the component menu (three dots) on the mural script.
+    [ContextMenu("Test: Tracking Found")]
+    private void TestTrackingFound()
+    {
+        if (Application.isPlaying)
+        {
+            NotifyTrackingFound();
+        }
+    }
+
+    [ContextMenu("Test: Tracking Lost")]
+    private void TestTrackingLost()
+    {
+        if (Application.isPlaying)
+        {
+            NotifyTrackingLost();
+        }
+    }
+
     // Waits one frame so that Awake and Start have run on the mural script before the intro begins.
     private IEnumerator PlayIntroNextFrame()
     {

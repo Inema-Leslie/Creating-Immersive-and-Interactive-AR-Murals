@@ -15,6 +15,9 @@ public class MuralSpawner : MonoBehaviour
     [Tooltip("Seconds without tracking before the mural counts as lost. Prevents flicker.")]
     public float lostDelay = 0.5f;
 
+    [Tooltip("Scales content by detected image width / data width. Lets a printout or screen stand in for the real mural.")]
+    public bool scaleToImageSize = true;
+
     [Header("Events for the UI")]
     public UnityEvent<MuralExperience> muralFound = new UnityEvent<MuralExperience>();
     public UnityEvent<MuralExperience> muralLost = new UnityEvent<MuralExperience>();
@@ -125,6 +128,11 @@ public class MuralSpawner : MonoBehaviour
         GameObject instance = Instantiate(muralData.prefab, image.transform);
         instance.transform.localPosition = Vector3.zero;
         instance.transform.localRotation = Quaternion.identity;
+
+        if (scaleToImageSize && muralData.widthMeters > 0f && image.size.x > 0f)
+        {
+            instance.transform.localScale = Vector3.one * (image.size.x / muralData.widthMeters);
+        }
 
         MuralExperience mural = instance.GetComponent<MuralExperience>();
         if (mural == null)
