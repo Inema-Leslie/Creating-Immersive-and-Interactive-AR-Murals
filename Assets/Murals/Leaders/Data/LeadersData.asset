@@ -13,14 +13,18 @@ MonoBehaviour:
   m_Name: LeadersData
   m_EditorClassIdentifier: 
   imageName: Leaders
-  widthMeters: 0
-  heightMeters: 0
-  prefab: {fileID: 0}
+  widthMeters: 4.6
+  heightMeters: 3.0053332
+  prefab: {fileID: 1663744314259432816, guid: 5cd751e2e8de09248a93d067f66881e5, type: 3}
   displayTitle: Leaders
   location: 
-  transformations: 
-  - 2
-  - 4
-  description: 'PENDING: tape measurement and cropped tracking photo. Meaning and the names of the people: ask guest relations.'
-  captions: []
-  scanHint: 
+  transformations: 0200000004000000
+  description: 'PENDING: tape measurement and cropped tracking photo. Meaning and
+    the names of the people: ask guest relations.'
+  captions:
+  - Watch the portraits lift out of the wall.
+  - Tap a portrait to hear their story. Tap the mask to wake them all.
+  - The mask wakes the portraits.
+  - You have heard every story.
+  scanHint: Stand 3 to 4 m in front of the mural so the whole painting fits on the
+    screen.
