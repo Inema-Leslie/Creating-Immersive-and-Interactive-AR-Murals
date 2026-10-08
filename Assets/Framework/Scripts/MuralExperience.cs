@@ -24,6 +24,10 @@ public class MuralExperience : MonoBehaviour
     // Raised when a mural wants to show a caption. The UI listens to this event.
     public static event Action<string> CaptionRequested;
 
+    // Raised when a mural wants to show or hide longer text (title and body) in the on-screen info panel.
+    public static event Action<string, string> InfoRequested;
+    public static event Action InfoHidden;
+
     // True once the intro has started. The intro never plays twice for the same spawn.
     public bool IntroPlayed { get; private set; }
 
@@ -209,6 +213,27 @@ public class MuralExperience : MonoBehaviour
         if (data != null && data.captions != null && index >= 0 && index < data.captions.Length)
         {
             ShowCaption(data.captions[index]);
+        }
+    }
+
+    // Shows a title and longer text on screen, where it stays readable at any distance.
+    protected void ShowInfo(string title, string body)
+    {
+        if (InfoRequested != null)
+        {
+            InfoRequested(title, body);
+        }
+        else
+        {
+            Debug.Log("[Info] " + title + ": " + body);
+        }
+    }
+
+    protected void HideInfo()
+    {
+        if (InfoHidden != null)
+        {
+            InfoHidden();
         }
     }
 
