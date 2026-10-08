@@ -22,6 +22,13 @@ public static class LeadersPrefabBuilder
     private const string GuideModel = "Models/Guide/Guide.fbx";
     private const string GuideAnimations = "Animations/Guide/";
 
+    // River: spill point in the painted river (straightened photo pixels) and the stream on the floor.
+    private static readonly Vector2 RiverPixel = new Vector2(760f, 735f);
+    private const float WaterfallWidth = 0.5f;
+    private const float StreamWidth = 1.3f;
+    private const float StreamLength = 1.9f;
+    private const int ReedCount = 10;
+
     // Pixel boxes in the straightened photo: x, y (from the top left), width, height.
     private static readonly Rect[] PortraitBoxes =
     {
@@ -67,7 +74,7 @@ public static class LeadersPrefabBuilder
     private static readonly float[] EyeRadii = { 45f, 35f };
     private static readonly Rect MaskBox = new Rect(0, 0, 640, 784);
 
-    private enum BlendType { Opaque, Transparent, Additive }
+    private enum BlendType { Opaque, Cutout, Transparent, Additive }
 
     private static float widthMeters;
     private static float heightMeters;
@@ -181,6 +188,7 @@ public static class LeadersPrefabBuilder
         BuildCard(root.transform, mural);
         mural.extras = AddExtras(root.transform);
         BuildGuide(root.transform, mural, shadowMat);
+        BuildRiver(root.transform, mural);
 
         string prefabPath = Folder + "Prefabs/LeadersMural.prefab";
         KeepFilledInFields(prefabPath, mural);
@@ -213,6 +221,254 @@ public static class LeadersPrefabBuilder
 
         AssetDatabase.SaveAssets();
         Debug.Log("Leaders prefab built at " + prefabPath + " with width " + widthMeters + " m.");
+    }
+
+    // ---------- River ----------
+
+    // Water pours down the wall from the painted river (bottom middle of the mural),
+    // then winds across the floor toward the viewer and opens into a round pool.
+    private static void BuildRiver(Transform parent, LeadersMural mural)
+    {
+        SetWaterImports();
+
+        Material fallMat = MakeWaterMaterial("M_WaterFall", "WaterfallMask.png", new Vector2(1f, 1.5f));
+        Material streamMat = MakeWaterMaterial("M_WaterStream", "StreamMask.png", new Vector2(1.5f, 2.5f));
+        Material splashMat = MakeMaterial("M_Splash", "SoftDot.png", BlendType.Transparent, true);
+        Material fireflyMat = MakeMaterial("M_Firefly", "Firefly.png", BlendType.Additive, true);
+
+        Vector3 spill = PixelToLocal(RiverPixel);
+        float floorZ = -heightMeters / 2f - FloorGapMeters;
+        float fallTop = spill.z + 0.08f;
+
+        GameObject river = new GameObject("River");
+        river.transform.SetParent(parent, false);
+
+        // Sheet of falling water lying on the wall, from inside the painted river down to the floor.
+        GameObject fall = MakeQuad("WaterFall", river.transform,
+            new Vector3(spill.x, 0.015f, (fallTop + floorZ) / 2f), new Vector2(WaterfallWidth, fallTop - floorZ), fallMat);
+        mural.waterfallSheet = fall.GetComponent<Renderer>();
+
+        // Stream on the floor, facing up (+Z). The top of its mask touches the wall.
+        GameObject stream = MakeQuad("Stream", river.transform,
+            new Vector3(spill.x, StreamLength / 2f, floorZ + 0.003f), new Vector2(StreamWidth, StreamLength), streamMat);
+        stream.transform.localRotation = Quaternion.Euler(180f, 0f, 0f);
+        mural.streamWater = stream.GetComponent<Renderer>();
+
+        mural.splash = MakeSplash(river.transform, new Vector3(spill.x, 0.06f, floorZ), splashMat);
+        mural.reeds = MakeReeds(river.transform, spill.x, floorZ);
+        mural.fireflies = MakeFireflies(river.transform,
+            new Vector3(spill.x, StreamLength * 0.6f, floorZ + 0.5f),
+            new Vector3(StreamWidth, StreamLength, 0.8f), fireflyMat);
+    }
+
+    // Same shape functions as the StreamMask texture. t runs from the wall (0) to the far end (1),
+    // u runs across the stream quad (0 to 1).
+    private static float RiverCenter(float t)
+    {
+        return 0.5f + 0.1f * Mathf.Sin(t * Mathf.PI * 2f);
+    }
+
+    private static float RiverHalfWidth(float t)
+    {
+        return 0.13f + 0.03f * t;
+    }
+
+    private const float PoolT = 0.78f;
+    private const float PoolHalfWidth = 0.36f;
+
+    // Reeds stand on both banks of the stream and around the pool, upright (+Z), with varied heights.
+    private static Transform[] MakeReeds(Transform parent, float riverX, float floorZ)
+    {
+        GameObject[] models =
+        {
+            AssetDatabase.LoadAssetAtPath<GameObject>(Folder + "Models/Reed/Reed_1.fbx"),
+            AssetDatabase.LoadAssetAtPath<GameObject>(Folder + "Models/Reed/Reed_2.fbx"),
+        };
+        if (models[0] == null || models[1] == null)
+        {
+            Debug.LogWarning("Reed models not found. Building the river without reeds.");
+            return new Transform[0];
+        }
+
+        Material reedMat = MakeMaterial("M_Reed", "Models/Reed/Reed_BaseMap.tga", BlendType.Cutout, false);
+        System.Random random = new System.Random(7);
+        Transform[] reeds = new Transform[ReedCount];
+
+        for (int i = 0; i < ReedCount; i++)
+        {
+            float side = (i % 2 == 0) ? -1f : 1f;
+            float t;
+            float u;
+            if (i < ReedCount - 2)
+            {
+                t = 0.1f + 0.5f * (i / 2) / ((ReedCount - 2) / 2f);
+                u = RiverCenter(t) + side * (RiverHalfWidth(t) + 0.03f + (float)random.NextDouble() * 0.04f);
+            }
+            else
+            {
+                t = PoolT;
+                u = 0.5f + side * (PoolHalfWidth + 0.03f);
+            }
+
+            float x = riverX + (u - 0.5f) * StreamWidth;
+            float height = 0.35f + (float)random.NextDouble() * 0.35f;
+
+            GameObject holder = new GameObject("Reed" + (i + 1));
+            holder.transform.SetParent(parent, false);
+            holder.transform.localPosition = new Vector3(x, t * StreamLength, floorZ);
+            holder.transform.localRotation = Quaternion.LookRotation(Vector3.up, Vector3.forward)
+                * Quaternion.Euler(0f, (float)random.NextDouble() * 360f, 0f);
+
+            GameObject body = (GameObject)PrefabUtility.InstantiatePrefab(models[i % 2]);
+            float modelHeight = MeasureHeight(body);
+            body.transform.SetParent(holder.transform, false);
+            body.transform.localPosition = Vector3.zero;
+            body.transform.localRotation = Quaternion.identity;
+            body.transform.localScale = Vector3.one * (height / modelHeight);
+
+            foreach (Renderer rend in body.GetComponentsInChildren<Renderer>())
+            {
+                Material[] mats = new Material[rend.sharedMaterials.Length];
+                for (int m = 0; m < mats.Length; m++)
+                {
+                    mats[m] = reedMat;
+                }
+                rend.sharedMaterials = mats;
+                rend.shadowCastingMode = ShadowCastingMode.Off;
+            }
+
+            reeds[i] = holder.transform;
+        }
+        return reeds;
+    }
+
+    // Water repeats so it can scroll forever. Masks are plain shapes, so no colour correction.
+    private static void SetWaterImports()
+    {
+        TextureImporter water = AssetImporter.GetAtPath(Folder + "Textures/Water.png") as TextureImporter;
+        if (water != null)
+        {
+            water.wrapMode = TextureWrapMode.Repeat;
+            water.SaveAndReimport();
+        }
+
+        string[] masks = { "StreamMask.png", "WaterfallMask.png" };
+        foreach (string maskName in masks)
+        {
+            TextureImporter mask = AssetImporter.GetAtPath(Folder + "Textures/" + maskName) as TextureImporter;
+            if (mask != null)
+            {
+                mask.sRGBTexture = false;
+                mask.wrapMode = TextureWrapMode.Clamp;
+                mask.SaveAndReimport();
+            }
+        }
+    }
+
+    private static Material MakeWaterMaterial(string name, string maskName, Vector2 tiling)
+    {
+        string path = Folder + "Materials/" + name + ".mat";
+        Material material = AssetDatabase.LoadAssetAtPath<Material>(path);
+        if (material == null)
+        {
+            material = new Material(Shader.Find("Leaders/Flowing Water"));
+            AssetDatabase.CreateAsset(material, path);
+        }
+
+        material.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(Folder + "Textures/Water.png"));
+        material.SetTextureScale("_BaseMap", tiling);
+        material.SetTexture("_MaskMap", AssetDatabase.LoadAssetAtPath<Texture2D>(Folder + "Textures/" + maskName));
+        material.SetColor("_BaseColor", new Color(1f, 1f, 1f, 0.9f));
+        EditorUtility.SetDirty(material);
+        return material;
+    }
+
+    private static ParticleSystem NewParticles(string name, Transform parent, Vector3 position, Material material)
+    {
+        GameObject go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = position;
+        ParticleSystem ps = go.AddComponent<ParticleSystem>();
+        ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        ParticleSystem.MainModule main = ps.main;
+        main.playOnAwake = false;
+        main.loop = true;
+        main.simulationSpace = ParticleSystemSimulationSpace.Local;
+        main.scalingMode = ParticleSystemScalingMode.Hierarchy;
+
+        go.GetComponent<ParticleSystemRenderer>().sharedMaterial = material;
+        return ps;
+    }
+
+    // Small white droplets bouncing up where the falling water meets the floor.
+    private static ParticleSystem MakeSplash(Transform parent, Vector3 position, Material material)
+    {
+        ParticleSystem ps = NewParticles("Splash", parent, position, material);
+
+        ParticleSystem.MainModule main = ps.main;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(0.25f, 0.45f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0.2f, 0.45f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.015f, 0.035f);
+        main.startColor = new Color(0.9f, 0.96f, 1f, 0.8f);
+        main.maxParticles = 80;
+
+        ParticleSystem.EmissionModule emission = ps.emission;
+        emission.rateOverTime = 35f;
+
+        // Emits upward (+Z) from a thin strip at the foot of the falling water, spread out a little.
+        ParticleSystem.ShapeModule shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Box;
+        shape.scale = new Vector3(WaterfallWidth * 0.6f, 0.05f, 0.01f);
+        shape.randomDirectionAmount = 0.5f;
+
+        ParticleSystem.ColorOverLifetimeModule color = ps.colorOverLifetime;
+        color.enabled = true;
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(1f, 0f), new GradientAlphaKey(0f, 1f) });
+        color.color = gradient;
+        return ps;
+    }
+
+    // Small warm lights drifting slowly over the water.
+    private static ParticleSystem MakeFireflies(Transform parent, Vector3 position, Vector3 area, Material material)
+    {
+        ParticleSystem ps = NewParticles("Fireflies", parent, position, material);
+
+        ParticleSystem.MainModule main = ps.main;
+        main.startLifetime = new ParticleSystem.MinMaxCurve(3f, 5f);
+        main.startSpeed = new ParticleSystem.MinMaxCurve(0.02f, 0.06f);
+        main.startSize = new ParticleSystem.MinMaxCurve(0.03f, 0.06f);
+        main.startColor = new Color(1f, 0.9f, 0.5f, 1f);
+        main.maxParticles = 40;
+
+        ParticleSystem.EmissionModule emission = ps.emission;
+        emission.rateOverTime = 6f;
+
+        ParticleSystem.ShapeModule shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Box;
+        shape.scale = area;
+
+        ParticleSystem.NoiseModule noise = ps.noise;
+        noise.enabled = true;
+        noise.strength = 0.08f;
+        noise.frequency = 0.5f;
+
+        // Fade in, flicker, fade out.
+        ParticleSystem.ColorOverLifetimeModule color = ps.colorOverLifetime;
+        color.enabled = true;
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+            new GradientAlphaKey[]
+            {
+                new GradientAlphaKey(0f, 0f), new GradientAlphaKey(1f, 0.2f), new GradientAlphaKey(0.3f, 0.4f),
+                new GradientAlphaKey(1f, 0.6f), new GradientAlphaKey(0.4f, 0.8f), new GradientAlphaKey(0f, 1f),
+            });
+        color.color = gradient;
+        return ps;
     }
 
     // ---------- Guide character ----------
@@ -637,10 +893,11 @@ public static class LeadersPrefabBuilder
             AssetDatabase.CreateAsset(material, path);
         }
 
-        material.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(Folder + "Textures/" + textureName));
+        string texturePath = textureName.Contains("/") ? Folder + textureName : Folder + "Textures/" + textureName;
+        material.SetTexture("_BaseMap", AssetDatabase.LoadAssetAtPath<Texture2D>(texturePath));
         material.SetColor("_BaseColor", Color.white);
 
-        if (blend == BlendType.Opaque)
+        if (blend == BlendType.Opaque || blend == BlendType.Cutout)
         {
             material.SetFloat("_Surface", 0f);
             material.SetOverrideTag("RenderType", "Opaque");
@@ -649,6 +906,21 @@ public static class LeadersPrefabBuilder
             material.SetFloat("_ZWrite", 1f);
             material.DisableKeyword("_SURFACE_TYPE_TRANSPARENT");
             material.renderQueue = (int)RenderQueue.Geometry;
+
+            // Cutout: see-through where the texture is transparent (reed leaves), visible from both sides.
+            bool cutout = blend == BlendType.Cutout;
+            material.SetFloat("_AlphaClip", cutout ? 1f : 0f);
+            material.SetFloat("_Cutoff", 0.4f);
+            material.SetFloat("_Cull", cutout ? 0f : 2f);
+            if (cutout)
+            {
+                material.EnableKeyword("_ALPHATEST_ON");
+                material.renderQueue = (int)RenderQueue.AlphaTest;
+            }
+            else
+            {
+                material.DisableKeyword("_ALPHATEST_ON");
+            }
         }
         else
         {

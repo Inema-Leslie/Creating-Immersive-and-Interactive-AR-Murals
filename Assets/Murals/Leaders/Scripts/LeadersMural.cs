@@ -51,6 +51,14 @@ public class LeadersMural : MuralExperience
     [Tooltip("Seconds of talking animation when a line has no audio clip yet.")]
     public float silentTalkSeconds = 3f;
 
+    [Header("River")]
+    public Renderer waterfallSheet;
+    public Renderer streamWater;
+    public ParticleSystem splash;
+    public ParticleSystem fireflies;
+    public Transform[] reeds;
+    public float flowSpeed = 0.35f;
+
     [Header("Info card")]
     public GameObject infoCard;
     public TMP_Text cardTitle;
@@ -76,6 +84,9 @@ public class LeadersMural : MuralExperience
     private Quaternion guideFacing;
     private bool guideArrived;
     private int nextGuideLine;
+    private Vector3[] reedScales;
+    private Quaternion[] reedRotations;
+    private float flowOffset;
     private float talkTimer;
     private int selected = -1;
     private bool introDone;
@@ -109,6 +120,20 @@ public class LeadersMural : MuralExperience
         {
             extrasScale = extras.localScale;
             extras.localScale = Vector3.zero;
+        }
+
+        if (streamWater != null)
+        {
+            waterfallSheet.material.SetFloat("_Reveal", 0f);
+            streamWater.material.SetFloat("_Reveal", 0f);
+            reedScales = new Vector3[reeds.Length];
+            reedRotations = new Quaternion[reeds.Length];
+            for (int i = 0; i < reeds.Length; i++)
+            {
+                reedScales[i] = reeds[i].localScale;
+                reedRotations[i] = reeds[i].localRotation;
+                reeds[i].localScale = Vector3.zero;
+            }
         }
 
         if (guide != null)
@@ -156,6 +181,10 @@ public class LeadersMural : MuralExperience
         {
             StartCoroutine(ScaleTo(extras, extrasScale, 1f));
         }
+        if (streamWater != null)
+        {
+            StartCoroutine(RiverFlows());
+        }
         if (guide != null)
         {
             StartCoroutine(GuideArrives());
@@ -198,6 +227,20 @@ public class LeadersMural : MuralExperience
         if (!busy && !completed)
         {
             SetAlpha(veins, 0.65f + Mathf.Sin(idleTime * 1.5f) * 0.25f);
+        }
+
+        // The stream flows toward the viewer and the reeds sway.
+        if (streamWater != null)
+        {
+            flowOffset += DeltaTime * flowSpeed;
+            streamWater.material.SetFloat("_FlowOffset", flowOffset);
+            waterfallSheet.material.SetFloat("_FlowOffset", flowOffset * 3f);
+            for (int i = 0; i < reeds.Length; i++)
+            {
+                float swayX = Mathf.Sin(idleTime * 1.3f + i) * 5f;
+                float swayZ = Mathf.Sin(idleTime * 0.9f + i * 1.7f) * 3f;
+                reeds[i].localRotation = reedRotations[i] * Quaternion.Euler(swayX, 0f, swayZ);
+            }
         }
 
         // The guide talks whenever a voice line is playing, and stands calmly otherwise.
@@ -391,6 +434,44 @@ public class LeadersMural : MuralExperience
         {
             guideAnimator.SetTrigger("Wave");
         }
+    }
+
+    // ---------- River ----------
+
+    // The painted river spills out of the wall onto the floor, then reeds grow along its banks.
+    private IEnumerator RiverFlows()
+    {
+        yield return RevealWater(waterfallSheet, 0.6f);
+        if (splash != null)
+        {
+            splash.Play();
+        }
+
+        StartCoroutine(RevealWater(streamWater, 2f));
+        for (int i = 0; i < reeds.Length; i++)
+        {
+            StartCoroutine(ScaleTo(reeds[i], reedScales[i], 0.6f));
+            yield return Wait(0.15f);
+        }
+
+        if (fireflies != null)
+        {
+            fireflies.Play();
+        }
+    }
+
+    // Uncovers the water from the start of its shape to the end. Stops while tracking is lost.
+    private IEnumerator RevealWater(Renderer water, float duration)
+    {
+        Material material = water.material;
+        float time = 0f;
+        while (time < duration)
+        {
+            time += DeltaTime;
+            material.SetFloat("_Reveal", Mathf.Clamp01(time / duration));
+            yield return null;
+        }
+        material.SetFloat("_Reveal", 1f);
     }
 
     // ---------- Guide character ----------
