@@ -71,7 +71,7 @@ public class MuralExperience : MonoBehaviour
 
     // Editor testing without a phone: in Play mode, use the component menu (three dots) on the mural script.
     [ContextMenu("Test: Tracking Found")]
-    private void TestTrackingFound()
+    protected void TestTrackingFound()
     {
         if (Application.isPlaying)
         {
@@ -80,7 +80,7 @@ public class MuralExperience : MonoBehaviour
     }
 
     [ContextMenu("Test: Tracking Lost")]
-    private void TestTrackingLost()
+    protected void TestTrackingLost()
     {
         if (Application.isPlaying)
         {
