@@ -14,13 +14,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   imageName: ConventionCenter
   widthMeters: 2.5
-  heightMeters: 2.5
-  prefab: {fileID: 0}
+  heightMeters: 2.7027028
+  prefab: {fileID: 8311342919907244322, guid: f4f69e0f9c3d17b44b4c635860a94472, type: 3}
   displayTitle: Convention Center
   location: 
-  transformations: 
-  - 0
-  - 4
+  transformations: 0000000004000000
   description: 'Width 2.5 m is PROVISIONAL until taped. Meaning: ask guest relations.'
-  captions: []
-  scanHint: 
+  captions:
+  - Watch the dome rise out of the wall.
+  - Tap the dome to change the lights, the tower cups for day or night, and the plant
+    to make it bloom.
+  scanHint: Stand about 3 m in front of the mural so the dome and tower fit on the
+    screen.
