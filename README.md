@@ -9,17 +9,15 @@ One Android AR app that recognizes five ALU campus murals and plays a different 
 
 ## Team and murals
 
-Owners below are taken from the photo file names. Confirm or correct this table in the first standup.
+| # | Mural name | Owner | Transformation | Measured width x height (m) | Branch |
+|---|---|---|---|---|---|
+| 1 | FuturisticCity | Leslie | Emergence, Storytelling | 1.6 x not measured | `mural-futuristiccity` |
+| 2 | ConventionCenter | Brian | Emergence, Storytelling | 2.5 x 2.7 | `mural-convention-center` |
+| 3 | Leaders | Bruno | Reconstruction, Storytelling | 4.4 x 3.45 | `main` (tech lead) |
+| 4 | Orbits | Bruno | Animation | 5.3 x 3.5 | `mural-orbits` |
+| 5 | FlyingCars | Gama | Expansion, Emergence | 5.4 x 8.2 | `iNTARE` |
 
-| # | Mural name | Owner | Role | Transformation | Real width (m) | Status |
-|---|---|---|---|---|---|---|
-| 1 | FabLab | Leslie | confirm | Animation | pending tape | needs cropped photo |
-| 2 | ConventionCenter | Brian | confirm | Emergence, Storytelling | 2.5 (provisional) | photo ready |
-| 3 | Leaders | Bruno | tech lead | Reconstruction, Storytelling | pending tape | needs cropped photo |
-| 4 | FlyingCars | Gama | confirm | Expansion, Emergence | pending tape | needs straight-on photo |
-| 5 | Mural5 | pending | pending | pending | pending | pending photo |
-
-Roles: tech lead (framework, tracking, builds), content builder A (two murals), content builder B (one mural and all audio), UI/UX and documentation (one mural, screens, design document, final PDF).
+Bruno is the tech lead (framework, tracking, main scene, builds).
 
 What any mural means comes only from guest relations. Until they reply, write "ask guest relations". Do not guess.
 
@@ -40,7 +38,7 @@ What any mural means comes only from guest relations. Until they reply, write "a
 ```
 Assets/
   Framework/              tech lead only
-    Scripts/              MuralData, MuralExperience, MuralSpawner, MuralTappable, TapInput
+    Scripts/              MuralData, MuralExperience, MuralSpawner, MuralTappable, TapInput, MuralInfoPanel
     Prefabs/
     Scenes/               Main scene
     ReferenceImages/      tracking photos and the reference image library
@@ -62,15 +60,15 @@ One name per mural, in PascalCase with no spaces, used everywhere:
 
 | Thing | Name | Example |
 |---|---|---|
-| Image name in the reference library | `<MuralName>` | `FabLab` |
-| Folder | `Assets/Murals/<MuralName>/` | `Assets/Murals/FabLab/` |
-| Prefab | `<MuralName>Mural` | `FabLabMural` |
-| Data asset | `<MuralName>Data` | `FabLabData` |
-| Script and class | `<MuralName>Mural`, inherits `MuralExperience` | `FabLabMural` |
-| Git branch | `mural-<muralname lowercase>` | `mural-fablab` |
-| Sandbox scene | `Sandbox_<MuralName>` | `Sandbox_FabLab` |
+| Image name in the reference library | `<MuralName>` | `Orbits` |
+| Folder | `Assets/Murals/<MuralName>/` | `Assets/Murals/Orbits/` |
+| Prefab | `<MuralName>Mural` | `OrbitsMural` |
+| Data asset | `<MuralName>Data` | `OrbitsData` |
+| Script and class | `<MuralName>Mural`, inherits `MuralExperience` | `OrbitsMural` |
+| Git branch | `mural-<muralname lowercase>` | `mural-orbits` |
+| Sandbox scene | `Sandbox_<MuralName>` | `Sandbox_Orbits` |
 
-Other branches: `framework` work goes straight to `main` (tech lead), UI work on `ui`, audio on `audio`.
+The branches actually in use are listed in the team table above. Framework work goes straight to `main` (tech lead).
 
 ## Ownership rules
 
@@ -112,8 +110,8 @@ Each mural has one `<MuralName>Data` asset in its `Data` folder. Fields:
 
 | Field | Meaning |
 |---|---|
-| imageName | Must match the reference library name exactly, for example `FabLab` |
-| widthMeters, heightMeters | Real size of the tracking area, measured with a tape |
+| imageName | Must match the reference library name exactly, for example `Orbits` |
+| widthMeters, heightMeters | Size the prefab was built for, in meters. The real measured size goes in the reference library, and the spawner scales the prefab to match |
 | prefab | The `<MuralName>Mural` prefab |
 | displayTitle | Title shown in the UI |
 | location | Where it is on campus |
@@ -152,13 +150,13 @@ Minimal mural script:
 using System.Collections;
 using UnityEngine;
 
-public class FabLabMural : MuralExperience
+public class ExampleMural : MuralExperience
 {
-    public Transform letters;
+    public Transform rings;
 
     private void Awake()
     {
-        letters.localScale = Vector3.zero;
+        rings.localScale = Vector3.zero;
     }
 
     public override void PlayIntro()
@@ -169,13 +167,13 @@ public class FabLabMural : MuralExperience
     private IEnumerator IntroSequence()
     {
         yield return Wait(1f);
-        yield return ScaleTo(letters, Vector3.one, 0.8f);
+        yield return ScaleTo(rings, Vector3.one, 0.8f);
         ShowCaption(0);
     }
 
     public override void OnTapped(MuralTappable tappable)
     {
-        if (tappable.id == "Letters")
+        if (tappable.id == "Rings")
         {
             // interaction here
         }
@@ -253,10 +251,10 @@ Pushed to branch (yes/no):
 
 | Date | What | Who |
 |---|---|---|
-| Oct 7 | Mural 5 photo, retakes of FabLab, Leaders and FlyingCars, tape measurements | all |
-| fill in | Framework on `main` | tech lead |
-| fill in | First mural pull requests | mural owners |
-| fill in | Audio pushed | content builder B |
+| Oct 7 | Photos and tape measurements (done) | all |
+| done | Framework on `main` | tech lead |
+| done | First mural merged (FuturisticCity) | mural owners |
+| fill in | All mural pull requests merged | mural owners |
 | fill in | UI screens pushed, design document draft | UI person |
 | fill in | Android build for recording | tech lead |
 | fill in | Demo video and technical walkthrough recorded | all |
