@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: LeadersData
   m_EditorClassIdentifier: 
   imageName: Leaders
-  widthMeters: 4.6
-  heightMeters: 3.0053332
+  widthMeters: 4.4
+  heightMeters: 3.45
   prefab: {fileID: 1663744314259432816, guid: 5cd751e2e8de09248a93d067f66881e5, type: 3}
   displayTitle: Leaders
   location: 
   transformations: 0200000004000000
-  description: 'PENDING: tape measurement and cropped tracking photo. Meaning and
-    the names of the people: ask guest relations.'
+  description: 'Measured: 4.4 m wide, 3.45 m high. Meaning and the names of the people:
+    ask guest relations.'
   captions:
   - Watch the portraits lift out of the wall.
   - Tap a portrait to hear their story. Tap the mask to wake them all.
