@@ -13,14 +13,13 @@ MonoBehaviour:
   m_Name: FlyingCarsData
   m_EditorClassIdentifier: 
   imageName: FlyingCars
-  widthMeters: 0
-  heightMeters: 0
-  prefab: {fileID: 0}
+  widthMeters: 5.4
+  heightMeters: 8.2
+  prefab: {fileID: 1847869439264079375, guid: 3e607ab2e1ccbb242acd75e124288579, type: 3}
   displayTitle: Flying Cars
   location: 
-  transformations: 
-  - 3
-  - 0
-  description: 'PENDING: tape measurement and a straight-on tracking photo. Meaning: ask guest relations.'
+  transformations: 0300000000000000
+  description: 'PENDING: tape measurement and a straight-on tracking photo. Meaning:
+    ask guest relations.'
   captions: []
-  scanHint: 
+  scanHint: Stand a few metres back, facing the whole mural.
