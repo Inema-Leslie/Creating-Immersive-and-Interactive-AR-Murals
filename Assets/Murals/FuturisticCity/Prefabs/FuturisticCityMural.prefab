@@ -5618,8 +5618,8 @@ MonoBehaviour:
   wireEnd: {fileID: 9040601314347594693}
   sparks: {fileID: 3848497461402943322}
   storyTitle: Futuristic City
-  storyText: '[Placeholder] The story of this mural, the artist and the meaning of
-    the scene. Ask guest relations.'
+  storyText: 'This mural shows a futuristic city with vibrant, colorful lights all over. A tram roams the skies, and we see the future materializing before our eyes. The tram represents transportation and progress, connecting people, places, and opportunities. The surrounding buildings and sweeping colors capture the rhythm of urban life, where innovation meets everyday experiences. Together, these elements tell a story of a city moving forward, driven by connection, creativity, and the possibilities of the future.'
+  storyVoice: {fileID: 8300000, guid: 83d18dac4ec89744badc4a118d671f8a, type: 3}
   tramClip: {fileID: 8300000, guid: 44f28964473740942b33d0336d60ff40, type: 3}
   bellClip: {fileID: 0}
   surgeClip: {fileID: 0}

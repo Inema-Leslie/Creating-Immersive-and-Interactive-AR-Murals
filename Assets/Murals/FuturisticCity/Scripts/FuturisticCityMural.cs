@@ -40,7 +40,10 @@ public class FuturisticCityMural : MuralExperience
     [Header("Story panel")]
     public string storyTitle = "Futuristic City";
     [TextArea(3, 8)]
-    public string storyText = "This mural shows a futuristic city. With vibrant colorful lights all over. a tram roaming the skies, we see the future materializing before our eyes. The train represents transportation and progress, connecting people, places, and opportunities. The surrounding buildings and sweeping colors capture the rhythm of urban life, where innovation meets everyday experiences. Together, these elements tell a story of a city moving forward, driven by connection, creativity, and the possibilities of the future.";
+    public string storyText = "This mural shows a futuristic city with vibrant, colorful lights all over. A tram roams the skies, and we see the future materializing before our eyes. The tram represents transportation and progress, connecting people, places, and opportunities. The surrounding buildings and sweeping colors capture the rhythm of urban life, where innovation meets everyday experiences. Together, these elements tell a story of a city moving forward, driven by connection, creativity, and the possibilities of the future.";
+
+    [Tooltip("Narration that plays when the story panel appears.")]
+    public AudioClip storyVoice;
 
     [Header("Audio")]
     public AudioClip tramClip;
@@ -58,6 +61,7 @@ public class FuturisticCityMural : MuralExperience
     private bool arrived;
     private bool surging;
     private float hoverTime;
+    private AudioSource voiceSource;
 
     // The tram waits inside the wall with only its front showing; lamps and headlights start off.
     private void Awake()
@@ -106,6 +110,7 @@ public class FuturisticCityMural : MuralExperience
         running = false;
         hoverTime = 0f;
         ShowInfo(storyTitle, storyText);
+        PlayStoryVoice();
         if (firstRun)
         {
             ShowCaption(1);
@@ -227,6 +232,7 @@ public class FuturisticCityMural : MuralExperience
         arrived = false;
         running = true;
         HideInfo();
+        StopStoryVoice();
         PlaySound(bellClip);
         ShowCaption("Next stop");
 
@@ -366,6 +372,30 @@ public class FuturisticCityMural : MuralExperience
     }
 
     // ---------- Helpers ----------
+
+    // The story is read out while the panel is on screen. Tracking loss pauses it with everything else.
+    private void PlayStoryVoice()
+    {
+        if (storyVoice == null)
+        {
+            return;
+        }
+        if (voiceSource == null)
+        {
+            voiceSource = gameObject.AddComponent<AudioSource>();
+            voiceSource.playOnAwake = false;
+        }
+        voiceSource.clip = storyVoice;
+        voiceSource.Play();
+    }
+
+    private void StopStoryVoice()
+    {
+        if (voiceSource != null)
+        {
+            voiceSource.Stop();
+        }
+    }
 
     private IEnumerator FadeAlpha(Renderer target, float to, float duration)
     {
