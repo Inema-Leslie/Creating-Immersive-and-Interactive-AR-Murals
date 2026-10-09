@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3729b82c4ac2dc41a8625ba007c0892, type: 3}
+  m_Name: MuralConfig
+  m_EditorClassIdentifier: MuralAR::MuralAR.MuralConfig
+  referenceImageName: FlyingCars
+  imageWidthMeters: 5.4
+  detectionSettleSeconds: 0.35
+  trackingGapSeconds: 0.25
+  lossHoldSeconds: 2
+  lossPauseSeconds: 5
+  poseFollowSharpness: 6
+  positionDeadZone: 0.015
+  rotationDeadZoneDegrees: 1.2
+  womanHeightMeters: 1.8
+  emergenceSeconds: 10
+  savannaRevealRadius: 3
+  savannaRevealSeconds: 6
+  carMinCameraDistance: 1.5
+  carFlightVolume: {x: 4, y: 3, z: 3}
+  holdToFullRevSeconds: 1.5
+  fireflyCount: 40
+  leafCount: 30
+  dustCount: 60
+  windStrengthRange: {x: 0.2, y: 1}
+  ambienceDuckPercent: 40
+  swipeThresholdPixels: 80
+  doubleTapWindowSeconds: 0.3
