@@ -11,7 +11,7 @@ One Android AR app that recognizes five ALU campus murals and plays a different 
 
 | # | Mural name | Owner | Transformation | Measured width x height (m) | Branch |
 |---|---|---|---|---|---|
-| 1 | FuturisticCity | Leslie | Emergence, Storytelling | 1.6 x 1.49 | `mural-futuristiccity` |
+| 1 | FuturisticCity | Leslie | Emergence, Storytelling | 1.5 x 1.49 | `mural-futuristiccity` |
 | 2 | ConventionCenter | Brian | Emergence, Storytelling | 2.5 x 2.7 | `mural-convention-center` |
 | 3 | Leaders | Bruno | Reconstruction, Storytelling | 4.4 x 3.45 | `main` (tech lead) |
 | 4 | Orbits | Bruno | Animation | 5.3 x 3.5 | `mural-orbits` |
