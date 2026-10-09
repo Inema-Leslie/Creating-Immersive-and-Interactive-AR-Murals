@@ -15,13 +15,13 @@ public enum TransformationType
 public class MuralData : ScriptableObject
 {
     [Header("Tracking")]
-    [Tooltip("Must match the image name in the reference image library exactly, for example FabLab.")]
+    [Tooltip("Must match the image name in the reference image library exactly, for example Leaders.")]
     public string imageName;
 
-    [Tooltip("Real width of the tracking image area in meters.")]
+    [Tooltip("Width the prefab was built for, in meters. The real width goes in the reference image library.")]
     public float widthMeters = 1f;
 
-    [Tooltip("Real height of the tracking image area in meters.")]
+    [Tooltip("Height the prefab was built for, in meters.")]
     public float heightMeters = 1f;
 
     [Tooltip("The mural prefab spawned when this image is detected.")]

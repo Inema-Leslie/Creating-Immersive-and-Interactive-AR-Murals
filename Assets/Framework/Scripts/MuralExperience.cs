@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.Playables;
 
 // Base class for every mural. Each mural script inherits from this class:
-//     public class FabLabMural : MuralExperience { ... }
+//     public class LeadersMural : MuralExperience { ... }
 // MuralSpawner calls the Notify methods. Mural scripts override PlayIntro and OnTapped,
 // and may override OnTrackingLost, OnTrackingFound and ResetExperience (call the base version inside).
 public class MuralExperience : MonoBehaviour

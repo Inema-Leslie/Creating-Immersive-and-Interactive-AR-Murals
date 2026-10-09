@@ -43,6 +43,14 @@ public class MuralSpawner : MonoBehaviour
     private void OnEnable()
     {
         imageManager.trackablesChanged.AddListener(OnTrackablesChanged);
+
+        // Picks up images that were found while the spawner was switched off, for example on the Start screen.
+        foreach (ARTrackedImage image in imageManager.trackables)
+        {
+            string imageName = image.referenceImage.name;
+            images[imageName] = image;
+            idToName[image.trackableId] = imageName;
+        }
     }
 
     private void OnDisable()
