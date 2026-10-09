@@ -17,10 +17,9 @@ MonoBehaviour:
   heightMeters: 3.45
   prefab: {fileID: 1663744314259432816, guid: 5cd751e2e8de09248a93d067f66881e5, type: 3}
   displayTitle: Leaders
-  location: 
+  location: Enterprise Commons, opposite Kenya and Burundi
   transformations: 0200000004000000
-  description: 'Measured: 4.4 m wide, 3.45 m high. Meaning and the names of the people:
-    ask guest relations.'
+  description: 'A guide walks you through the five portraits while a river with reeds and fireflies flows below. AR experience by Bruno. For the story behind the mural, ask ALU guest relations.'
   captions:
   - Watch the portraits lift out of the wall.
   - Tap a portrait to hear their story. Tap the mask to wake them all.

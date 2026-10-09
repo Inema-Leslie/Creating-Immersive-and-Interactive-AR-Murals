@@ -17,9 +17,9 @@ MonoBehaviour:
   heightMeters: 2.7027028
   prefab: {fileID: 8311342919907244322, guid: f4f69e0f9c3d17b44b4c635860a94472, type: 3}
   displayTitle: Convention Center
-  location: 
+  location: In front of reception
   transformations: 0000000004000000
-  description: 'Width 2.5 m is PROVISIONAL until taped. Meaning: ask guest relations.'
+  description: 'The dome lights up, the tower and cups rise and a plant grows out of the wall. AR experience by Brian. For the story behind the mural, ask ALU guest relations.'
   captions:
   - Watch the dome rise out of the wall.
   - Tap the dome to change the lights, the tower cups for day or night, and the plant

@@ -17,10 +17,9 @@ MonoBehaviour:
   heightMeters: 4.634375
   prefab: {fileID: 7038986518907756099, guid: a5e867ca5013d1340b6a5e0a01212674, type: 3}
   displayTitle: Orbits
-  location: 
+  location: Below the food court
   transformations: 01000000
-  description: 'Width 6.4 m is a PLACEHOLDER estimate until taped. Meaning: ask guest
-    relations.'
+  description: 'The rings, bangles, bubbles, orb and cubes lift off the wall and start to orbit. AR experience by Bruno. For the story behind the mural, ask ALU guest relations.'
   captions:
   - Watch the rings come off the wall.
   - Tap the head to spin the rings, the raised hand for an orb, or a bubble to pop

@@ -6,13 +6,13 @@ Built with Unity 6000.4.7f1 (URP), AR Foundation 6.6.2 and Google ARCore.
 
 ## The murals
 
-| Mural | Made by | What happens in AR | Wall size (m) |
-|---|---|---|---|
-| Futuristic City | Leslie | The tram pulls out of the wall under glowing street lamps, with a narrated story | 1.5 x 1.49 |
-| Convention Center | Brian | The dome lights up, the tower and cups rise and a plant grows | 2.5 x 2.7 |
-| Leaders | Bruno | A guide walks you through the five portraits; a river with reeds and fireflies flows below | 4.4 x 3.45 |
-| Orbits | Bruno | The rings, bangles, bubbles, orb and cubes lift off the wall and start to orbit | 5.3 x 3.5 |
-| Flying Cars | Gama | Cars fly out of the mural, Amanirenas steps through a golden portal and the scene turns into a savanna at nightfall | 5.4 x 8.2 |
+| Mural | Made by | Where on campus | What happens in AR | Wall size (m) |
+|---|---|---|---|---|
+| Futuristic City | Leslie | In front of reception | The tram pulls out of the wall under glowing street lamps, with a narrated story | 1.5 x 1.49 |
+| Convention Center | Brian | In front of reception | The dome lights up, the tower and cups rise and a plant grows | 2.5 x 2.7 |
+| Leaders | Bruno | Enterprise Commons, opposite Kenya and Burundi | A guide walks you through the five portraits; a river with reeds and fireflies flows below | 4.4 x 3.45 |
+| Orbits | Bruno | Below the food court | The rings, bangles, bubbles, orb and cubes lift off the wall and start to orbit | 5.3 x 3.5 |
+| Flying Cars | Gama | Learning Commons, opposite Mozambique | Cars fly out of the mural, Amanirenas steps through a golden portal and the scene turns into a savanna at nightfall | 5.4 x 8.2 |
 
 The stories behind the murals come from ALU guest relations.
 
@@ -154,7 +154,7 @@ Everyone works on their own branch and only changes their own mural folder. When
   [African background music](https://pixabay.com/music/supernatural-african-african-background-music-348249/),
   [tribal drums](https://pixabay.com/sound-effects/musical-tribal-drums-526712/),
   [Harambee Africa](https://pixabay.com/music/drum-n-bass-harambee-africa-swahili-drum-and-bass-594062/)
-- Amanirenas: [Queen Amanirenas](https://www.cgtrader.com/free-3d-models/character/woman/queen-amanirenas-3d), CGTrader
+- Amanirenas: [Queen Amanirenas](https://www.cgtrader.com/free-3d-models/character/woman/queen-amanirenas-3d), CGTrader (Royalty Free License)
 - Toyota AE86 by IvOfficial and Acacia by Poly by Google, [Poly Pizza](https://poly.pizza) (CC BY)
 - Unity Asset Store: ARCADE - FREE Racing Car, Magic effects pack by Hovl Studio, Grass Flowers FREE by ALP Assets, Unity Particle Pack
 
