@@ -143,17 +143,14 @@ Everyone works on their own branch and only changes their own mural folder. When
 - Car sounds from Pixabay:
   [engine starting](https://pixabay.com/sound-effects/city-car-engine-starting-43705/),
   [flying vehicle](https://pixabay.com/sound-effects/film-special-effects-flying-vehicle-sound-98568/),
-  [supercar revs](https://pixabay.com/sound-effects/film-special-effects-aggressive-supercar-engine-throttle-revs-537640),
   [car passing with birds](https://pixabay.com/sound-effects/city-car-passing-and-birds-chirping-in-the-background-26051/),
-  [car brake](https://pixabay.com/sound-effects/film-special-effects-car-brake-324939/),
-  [car brake 3](https://pixabay.com/sound-effects/film-special-effects-car-brake3-325523/),
   [hand brake](https://pixabay.com/sound-effects/city-car-hand-brake-while-engine-is-running-85726/),
   [car honk](https://pixabay.com/sound-effects/film-special-effects-car-honk-386166/)
 - Story music, mixed from Pixabay tracks:
   [African drums](https://pixabay.com/music/solo-instruments-african-drums-209632/),
   [African background music](https://pixabay.com/music/supernatural-african-african-background-music-348249/),
-  [tribal drums](https://pixabay.com/sound-effects/musical-tribal-drums-526712/),
-  [Harambee Africa](https://pixabay.com/music/drum-n-bass-harambee-africa-swahili-drum-and-bass-594062/)
+  [tribal drums](https://pixabay.com/sound-effects/musical-tribal-drums-526712/)
+- Amanirenas: [Queen Amanirenas](https://www.cgtrader.com/free-3d-models/character/woman/queen-amanirenas-3d), CGTrader
 - Toyota AE86 by IvOfficial and Acacia by Poly by Google, [Poly Pizza](https://poly.pizza) (CC BY)
 - Unity Asset Store: ARCADE - FREE Racing Car, Magic effects pack by Hovl Studio, Grass Flowers FREE by ALP Assets, Unity Particle Pack
 
