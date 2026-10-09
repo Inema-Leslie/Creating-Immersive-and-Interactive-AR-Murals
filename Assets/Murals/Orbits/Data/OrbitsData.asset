@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 00114c503abe4ed8adf1d2809fa00a47, type: 3}
+  m_Name: OrbitsData
+  m_EditorClassIdentifier: 
+  imageName: Orbits
+  widthMeters: 6.4
+  heightMeters: 4.634375
+  prefab: {fileID: 7038986518907756099, guid: a5e867ca5013d1340b6a5e0a01212674, type: 3}
+  displayTitle: Orbits
+  location: 
+  transformations: 01000000
+  description: 'Width 6.4 m is a PLACEHOLDER estimate until taped. Meaning: ask guest
+    relations.'
+  captions:
+  - Watch the rings come off the wall.
+  - Tap the head to spin the rings, the raised hand for an orb, or a bubble to pop
+    it.
+  scanHint: Stand about 5 m back so the head and the raised hand both fit on the
+    screen.
