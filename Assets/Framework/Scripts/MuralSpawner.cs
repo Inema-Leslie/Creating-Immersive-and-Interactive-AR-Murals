@@ -18,6 +18,15 @@ public class MuralSpawner : MonoBehaviour
     [Tooltip("Scales content by detected image width / data width. Lets a printout or screen stand in for the real mural.")]
     public bool scaleToImageSize = true;
 
+    [Tooltip("Keeps murals on walls standing straight up. Small errors in the wall angle no longer tip the content forward or back.")]
+    public bool keepUpright = true;
+
+    [Tooltip("How quickly the content follows tracking corrections. Lower is steadier, higher reacts faster. 0 turns smoothing off.")]
+    public float smoothing = 8f;
+
+    [Tooltip("Turns the scene light to shine on the found mural from the visitor's side, so 3D content is never lit from behind.")]
+    public bool lightFromViewer = true;
+
     [Header("Events for the UI")]
     public UnityEvent<MuralExperience> muralFound = new UnityEvent<MuralExperience>();
     public UnityEvent<MuralExperience> muralLost = new UnityEvent<MuralExperience>();
@@ -34,6 +43,7 @@ public class MuralSpawner : MonoBehaviour
     private readonly Dictionary<string, float> lastSeenTime = new Dictionary<string, float>();
     private readonly Dictionary<TrackableId, string> idToName = new Dictionary<TrackableId, string>();
     private readonly HashSet<string> missingData = new HashSet<string>();
+    private readonly Dictionary<string, Pose> shownPose = new Dictionary<string, Pose>();
 
     private void Awake()
     {
@@ -107,6 +117,7 @@ public class MuralSpawner : MonoBehaviour
                     isTracked[imageName] = true;
                     MuralExperience mural = spawned[imageName];
                     ActiveMural = mural;
+                    AimLightAt(mural.transform);
                     mural.NotifyTrackingFound();
                     muralFound.Invoke(mural);
                 }
@@ -119,6 +130,77 @@ public class MuralSpawner : MonoBehaviour
                 muralLost.Invoke(mural);
             }
         }
+    }
+
+    // Runs after tracking has moved the images this frame. Each mural follows its image smoothly,
+    // standing upright on the wall, so tracking wobble does not shake or tip the content.
+    private void LateUpdate()
+    {
+        foreach (KeyValuePair<string, MuralExperience> pair in spawned)
+        {
+            ARTrackedImage image;
+            if (pair.Value == null || !images.TryGetValue(pair.Key, out image) || image == null)
+            {
+                continue;
+            }
+
+            Vector3 targetPosition = image.transform.position;
+            Quaternion targetRotation = TargetRotation(image.transform);
+
+            // Start from where the mural was shown last frame, not where the image moved it to.
+            Pose pose;
+            if (!shownPose.TryGetValue(pair.Key, out pose))
+            {
+                pose = new Pose(targetPosition, targetRotation);
+            }
+            float blend = smoothing > 0f ? 1f - Mathf.Exp(-smoothing * Time.deltaTime) : 1f;
+            pose.position = Vector3.Lerp(pose.position, targetPosition, blend);
+            pose.rotation = Quaternion.Slerp(pose.rotation, targetRotation, blend);
+            shownPose[pair.Key] = pose;
+            pair.Value.transform.SetPositionAndRotation(pose.position, pose.rotation);
+        }
+    }
+
+    // The world's directions are random compared to each wall, so a fixed light can end up behind the mural.
+    // Aim it from in front of the wall, above and a little to the left. A mural may still change it afterwards.
+    private void AimLightAt(Transform mural)
+    {
+        if (!lightFromViewer)
+        {
+            return;
+        }
+        Light sun = RenderSettings.sun;
+        if (sun == null)
+        {
+            foreach (Light light in FindObjectsByType<Light>(FindObjectsSortMode.None))
+            {
+                if (light.type == LightType.Directional)
+                {
+                    sun = light;
+                    break;
+                }
+            }
+        }
+        if (sun == null)
+        {
+            return;
+        }
+        // On a mural: Y points out of the wall, Z up the wall, X to the right.
+        Vector3 direction = -mural.up * 0.6f - mural.forward * 0.7f + mural.right * 0.35f;
+        sun.transform.rotation = Quaternion.LookRotation(direction.normalized, mural.forward);
+    }
+
+    // The image's own rotation, or for a wall, the same rotation with the wall made exactly vertical.
+    // On an image, Y points out of the picture and Z points to the top of the picture.
+    private Quaternion TargetRotation(Transform image)
+    {
+        Vector3 outOfWall = image.up;
+        if (!keepUpright || Mathf.Abs(outOfWall.y) > 0.7f)
+        {
+            return image.rotation;
+        }
+        outOfWall.y = 0f;
+        return Quaternion.LookRotation(Vector3.up, outOfWall.normalized);
     }
 
     private void SpawnMural(string imageName, ARTrackedImage image)
@@ -135,7 +217,8 @@ public class MuralSpawner : MonoBehaviour
 
         GameObject instance = Instantiate(muralData.prefab, image.transform);
         instance.transform.localPosition = Vector3.zero;
-        instance.transform.localRotation = Quaternion.identity;
+        instance.transform.rotation = TargetRotation(image.transform);
+        shownPose[imageName] = new Pose(instance.transform.position, instance.transform.rotation);
 
         if (scaleToImageSize && muralData.widthMeters > 0f && image.size.x > 0f)
         {
@@ -194,6 +277,7 @@ public class MuralSpawner : MonoBehaviour
         }
         spawned.Remove(imageName);
         isTracked.Remove(imageName);
+        shownPose.Remove(imageName);
     }
 
     // Destroys a mural instance. A fresh copy spawns on the next frame the image is tracked, and its intro plays.

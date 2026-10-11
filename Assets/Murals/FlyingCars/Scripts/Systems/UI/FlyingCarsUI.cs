@@ -147,9 +147,27 @@ namespace MuralAR
         void Build()
         {
             var barCanvas = MakeCanvas("FlyingCars Bar", 25);
+            // The bar sits just under the app's header card (which ends 384 units below the top of the
+            // safe area), inside the same safe area, so it never covers About, Replay or Exit.
+            var safeArea = new GameObject("SafeArea", typeof(RectTransform));
+            safeArea.transform.SetParent(barCanvas, false);
+            var safeRect = (RectTransform)safeArea.transform;
+            Rect area = Screen.safeArea;
+            if (Screen.width > 0 && Screen.height > 0)
+            {
+                safeRect.anchorMin = new Vector2(area.xMin / Screen.width, area.yMin / Screen.height);
+                safeRect.anchorMax = new Vector2(area.xMax / Screen.width, area.yMax / Screen.height);
+            }
+            else
+            {
+                safeRect.anchorMin = Vector2.zero;
+                safeRect.anchorMax = Vector2.one;
+            }
+            safeRect.offsetMin = Vector2.zero;
+            safeRect.offsetMax = Vector2.zero;
             _bar = new GameObject("Bar", typeof(RectTransform));
-            _bar.transform.SetParent(barCanvas, false);
-            Stretch((RectTransform)_bar.transform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(30f, -420f), new Vector2(-30f, -310f));
+            _bar.transform.SetParent(safeArea.transform, false);
+            Stretch((RectTransform)_bar.transform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(30f, -520f), new Vector2(-30f, -410f));
             MuralsButton = MakeButton(_bar.transform, "MuralsButton", "Murals", new Vector2(0f, 0f), new Vector2(0.38f, 1f), OpenGallery, primary: false);
             BlackAndWhite(MuralsButton);
             CallButton = MakeButton(_bar.transform, "CallButton", "How to call AMANIRENAS", new Vector2(0.4f, 0f), new Vector2(1f, 1f), ShowHowToCall, primary: true);
