@@ -4,6 +4,13 @@ An Android AR app for the ALU campus. Point your phone at one of five murals and
 
 Built with Unity 6000.4.7f1 (URP), AR Foundation 6.6.2 and Google ARCore.
 
+## Links
+
+- Android app (APK): https://drive.google.com/file/d/1_Rtsr21UJPqvGez_m_WDuTbF4kQJVrPk/view?usp=sharing
+- Demonstration video: https://youtu.be/g57dfWJXOSE
+- Technical walkthrough, codebase: https://drive.google.com/file/d/1LMpMJBYSVF29-1Mb0KqRJ8McVjLA5eVq/view?usp=sharing
+- Technical walkthrough, Unity setup: https://drive.google.com/file/d/1wVsVbHOXdRO0gMIPE8fRnMd5ZPn2jCUr/view?usp=sharing
+
 ## The murals
 
 | Mural | Made by | Where on campus | What happens in AR | Wall size (m) |
