@@ -9,41 +9,44 @@ Built with Unity 6000.4.7f1 (URP), AR Foundation 6.6.2 and Google ARCore.
 | Mural | Made by | Where on campus | What happens in AR | Wall size (m) |
 |---|---|---|---|---|
 | Futuristic City | Leslie | In front of reception | The tram pulls out of the wall under glowing street lamps, with a narrated story | 1.5 x 1.49 |
-| Convention Center | Brian | In front of reception | The dome lights up, the tower and cups rise and a plant grows | 2.5 x 2.7 |
+| Convention Center | Brian | In front of reception | A glass dome grows tier by tier and lights up blue, yellow and green, the tower and cups rise and a plant grows. About tells the story of the Kigali Convention Centre | 2.5 x 2.7 |
 | Leaders | Bruno | Enterprise Commons, opposite Kenya and Burundi | A guide walks you through the five portraits; a river with reeds and fireflies flows below | 4.4 x 3.45 |
 | Orbits | Bruno | Below the food court | The rings, bangles, bubbles, orb and cubes lift off the wall and start to orbit | 5.3 x 3.5 |
 | Flying Cars | Gama | Learning Commons, opposite Mozambique | Cars fly out of the mural, Amanirenas steps through a golden portal and the scene turns into a savanna at nightfall | 5.4 x 8.2 |
 
-The stories behind the murals come from ALU guest relations.
+The app talks about the people and places painted on the walls. For what each mural means, it points visitors to ALU guest relations.
 
 ## Getting started
 
-1. In Unity Hub, install **6000.4.7f1** with **Android Build Support** (tick OpenJDK and Android SDK and NDK Tools).
+1. In Unity Hub, install 6000.4.7f1 with Android Build Support (tick OpenJDK and Android SDK and NDK Tools).
 2. Clone the repo:
    ```
    git clone https://github.com/Inema-Leslie/Creating-Immersive-and-Interactive-AR-Murals.git
    ```
 3. Add the folder in Unity Hub and open it. The first import takes a few minutes.
-4. Go to **File > Build Profiles**, pick **Android** and press **Switch Platform**.
+4. Go to File > Build Profiles, pick Android and press Switch Platform.
 5. Open `Assets/Framework/Scenes/Main.unity`. This is the scene that goes into the app.
 
-To try it on a phone, plug in an ARCore phone with USB debugging on and use **Build And Run** in Build Profiles.
+To try it on a phone, plug in an ARCore phone with USB debugging on and use Build And Run in Build Profiles.
 
 ## How the app works
 
-The app has four screens:
+The app has four screens. The Start screen has the title and a Start button; phones without ARCore get a message there instead. The Scanning screen shows a camera frame and a hint to point at a mural. On the AR screen the mural comes alive, and the top bar shows its name and place on campus with About, Replay and Exit. About opens a story panel that scrolls. The Exit screen says how many murals you explored and offers Scan again or Close app. The phone's back button works on every screen.
 
-- **Start**: title and a Start button. Phones without ARCore get a message instead.
-- **Scanning**: a camera frame and a hint to point at a mural.
-- **AR**: the mural comes alive. The top bar shows its name with About, Replay and Exit buttons.
-- **Exit**: shows how many murals you explored, with Scan again and Close app.
-
-Behind the screens:
+What happens behind the screens:
 
 - All five tracking photos are in one reference image library (`Assets/Framework/ReferenceImages/MuralImageLibrary`), each with the real width of the wall.
-- When ARCore finds a photo, `MuralSpawner` places that mural's prefab on the wall and scales it to the real size.
+- When ARCore finds a photo, `MuralSpawner` places that mural's prefab on the wall and scales it to the real size. It keeps the mural standing straight on the wall and smooths out small tracking corrections, so nothing shakes or tips.
+- The scene light is turned toward each mural when it is found, so 3D objects are lit from the visitor's side.
 - If you point away, the mural pauses and fades. When you point back, it carries on from where it stopped.
 - Taps go through `TapInput` to any object with a `MuralTappable` component.
+- Only the mural you are looking at can put text on screen, so one mural's story never shows up over another.
+
+## Testing on a PC
+
+You can run the whole app in Unity without a phone. Open the main scene, set the Game view to a portrait size such as 1080x1920, and press Play. Unity's XR Simulation puts you in a virtual room (`Assets/Framework/Simulation/MuralSimulationRoom`) with all five tracking photos on one long wall at their real sizes, from left to right: Futuristic City, Convention Center, Leaders, Orbits and Flying Cars. You start in front of Leaders.
+
+Hold the right mouse button and move the mouse to look around. W, A, S and D walk, Q and E go down and up, and Shift moves faster. Click Start exploring, walk up to a mural, and click on things to tap them.
 
 ## Project layout
 
@@ -120,25 +123,27 @@ Everyone works on their own branch and only changes their own mural folder. When
 
 ## Credits
 
-**Leaders**
+### Leaders
 - Guide character and animations: [Adobe Mixamo](https://www.mixamo.com) (Ch12 with Talking, Breathing Idle, Waving and Pointing)
 - Reeds: [3D Game Assets - Flora](https://assetstore.unity.com/packages/3d/environments/3d-game-assets-flora-318366), Unity Asset Store
 - Firefly textures: [Firefly Flare Effect](https://assetstore.unity.com/packages/vfx/shaders/firefly-flare-effect-288941) by COMICOMI, Unity Asset Store
 - Narration recorded by the team
+- Portrait stories written by the team from public sources
 
-**Orbits**
+### Orbits
 - Sound effects from [Pixabay](https://pixabay.com/sound-effects/) (Pixabay Content License)
 
-**Convention Center**
+### Convention Center
 - Sound effects from [Pixabay](https://pixabay.com/sound-effects/) and [Freesound](https://freesound.org)
+- Story panel facts: [New Times Rwanda](https://www.newtimes.co.rw/article/130969/News/tracing-the-story-behind-the-kigali-convention-complex/amp), [Knippers Helbig](https://www.knippershelbig.com/en/projects/kongresszentrum/), [KT Press](https://ktpress.rw/2024/08/central-bank-issues-new-bank-notes-of-rwf-5000-and-rwf-2000) and the [Rwanda Convention Bureau](https://rcb.rw/Kigali-Convention-Center.html)
 
-**Futuristic City**
+### Futuristic City
 - Tram: [Red low poly Tram with UV](https://sketchfab.com/3d-models/red-low-poly-tram-with-uv-23d43dda5d3143ec8645cf1af90ab6e5) by ddggoorrddgg, Sketchfab (CC BY 4.0)
 - Street lamps: [Street Lamps 2](https://assetstore.unity.com/packages/3d/props/exterior/street-lamps-2-260395), Unity Asset Store
 - Tram sound: [tram (9)](https://freesound.org/people/audio_master12376/sounds/774538/) by audio_master12376, Freesound (CC0)
 - Story narration recorded by the team
 
-**Flying Cars**
+### Flying Cars
 - Story narration recorded by Amanda
 - Car sounds from Pixabay:
   [engine starting](https://pixabay.com/sound-effects/city-car-engine-starting-43705/),
@@ -158,7 +163,7 @@ Everyone works on their own branch and only changes their own mural folder. When
 - Toyota AE86 by IvOfficial and Acacia by Poly by Google, [Poly Pizza](https://poly.pizza) (CC BY)
 - Unity Asset Store: ARCADE - FREE Racing Car, Magic effects pack by Hovl Studio, Grass Flowers FREE by ALP Assets, Unity Particle Pack
 
-**App screens**
+### App screens
 - Font: [Poppins](https://fonts.google.com/specimen/Poppins) by the Poppins Project Authors (SIL Open Font License)
 
 All mural photos and tracking images were taken by the team.
