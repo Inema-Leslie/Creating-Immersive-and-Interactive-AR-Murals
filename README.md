@@ -159,7 +159,6 @@ Everyone works on their own branch and only changes their own mural folder. When
   [African background music](https://pixabay.com/music/supernatural-african-african-background-music-348249/),
   [tribal drums](https://pixabay.com/sound-effects/musical-tribal-drums-526712/),
   [Harambee Africa](https://pixabay.com/music/drum-n-bass-harambee-africa-swahili-drum-and-bass-594062/)
-- Amanirenas: [Queen Amanirenas](https://www.cgtrader.com/free-3d-models/character/woman/queen-amanirenas-3d), CGTrader (Royalty Free License)
 - Toyota AE86 by IvOfficial and Acacia by Poly by Google, [Poly Pizza](https://poly.pizza) (CC BY)
 - Unity Asset Store: ARCADE - FREE Racing Car, Magic effects pack by Hovl Studio, Grass Flowers FREE by ALP Assets, Unity Particle Pack
 

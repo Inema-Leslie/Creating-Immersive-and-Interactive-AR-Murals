@@ -687,13 +687,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Unity.XR.Simulation::UnityEngine.XR.Simulation.SimulationEnvironment
   m_CameraStartingPose:
-    position: {x: -3.3500001, y: 1.6, z: 4.5}
+    position: {x: -3.3500001, y: 1.6, z: 7.5}
     rotation: {x: 0, y: 1, z: 0, w: 0}
   m_CameraMovementBounds:
     m_Center: {x: 0, y: 5.3743167, z: 8}
     m_Extent: {x: 18.55, y: 5.3743167, z: 7.8}
   m_DefaultViewPose:
-    position: {x: -3.3500001, y: 1.6, z: 4.5}
+    position: {x: -3.3500001, y: 1.6, z: 7.5}
     rotation: {x: 0, y: 1, z: 0, w: 0}
   m_DefaultViewPivot: {x: -3.3500001, y: 2.1251667, z: 0}
   m_DefaultViewSize: 6
