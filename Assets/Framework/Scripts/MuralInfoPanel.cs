@@ -43,6 +43,7 @@ public class MuralInfoPanel : MonoBehaviour
     {
         captionText.text = text;
         captionBox.SetActive(true);
+        PlaceCaption();
         if (captionRoutine != null)
         {
             StopCoroutine(captionRoutine);
@@ -55,11 +56,39 @@ public class MuralInfoPanel : MonoBehaviour
         infoTitle.text = title;
         infoBody.text = body;
         infoBox.SetActive(true);
+        PlaceCaption();
     }
 
     public void HideInfo()
     {
         infoBox.SetActive(false);
+        PlaceCaption();
+    }
+
+    public void HideCaption()
+    {
+        if (captionRoutine != null)
+        {
+            StopCoroutine(captionRoutine);
+            captionRoutine = null;
+        }
+        captionBox.SetActive(false);
+    }
+
+    // Clears everything a mural put on screen. Called when the app moves to another mural, so no text stays behind.
+    public void ClearAll()
+    {
+        HideInfo();
+        HideCaption();
+    }
+
+    // The caption sits at the bottom, or just above the info panel while that is open, so they never overlap.
+    private void PlaceCaption()
+    {
+        RectTransform rect = captionBox.GetComponent<RectTransform>();
+        float bottom = infoBox.activeSelf ? 800f : 60f;
+        rect.offsetMin = new Vector2(rect.offsetMin.x, bottom);
+        rect.offsetMax = new Vector2(rect.offsetMax.x, bottom + 140f);
     }
 
     private IEnumerator HideCaptionLater()
@@ -90,16 +119,23 @@ public class MuralInfoPanel : MonoBehaviour
 
         // Info panel: title and story, above the caption.
         infoBox = MakeBox("Info", canvasObject.transform, 40f, 220f, 560f);
-        infoTitle = MakeText("Title", infoBox.transform, 56f, FontStyles.Bold, new Color(1f, 0.82f, 0.45f));
+        infoTitle = MakeText("Title", infoBox.transform, 56f, FontStyles.Bold, new Color(1f, 0.8f, 0.42f));
         Fill(infoTitle.rectTransform, 40f, 30f, 40f, 440f);
         infoBody = MakeText("Body", infoBox.transform, 38f, FontStyles.Normal, Color.white);
         Fill(infoBody.rectTransform, 40f, 120f, 40f, 30f);
+        // Long stories shrink to fit inside the panel instead of running out of it.
+        infoBody.enableAutoSizing = true;
+        infoBody.fontSizeMin = 24f;
+        infoBody.fontSizeMax = 38f;
+        captionText.enableAutoSizing = true;
+        captionText.fontSizeMin = 26f;
+        captionText.fontSizeMax = 42f;
     }
 
     // A dark box stretched across the screen width, a set distance from the bottom.
     private GameObject MakeBox(string name, Transform parent, float sideMargin, float bottom, float height)
     {
-        GameObject box = new GameObject(name, typeof(RectTransform), typeof(Image));
+        GameObject box = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Outline));
         box.transform.SetParent(parent, false);
         RectTransform rect = box.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0f, 0f);
@@ -108,8 +144,11 @@ public class MuralInfoPanel : MonoBehaviour
         rect.offsetMin = new Vector2(sideMargin, bottom);
         rect.offsetMax = new Vector2(-sideMargin, bottom + height);
         Image image = box.GetComponent<Image>();
-        image.color = new Color(0.04f, 0.06f, 0.09f, 0.85f);
+        image.color = new Color(0.17f, 0.12f, 0.1f, 0.9f);
         image.raycastTarget = false;
+        Outline outline = box.GetComponent<Outline>();
+        outline.effectColor = new Color(0.81f, 0.48f, 0.19f, 1f);
+        outline.effectDistance = new Vector2(3f, -3f);
         return box;
     }
 

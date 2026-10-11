@@ -35,10 +35,11 @@ public class MuralAppUI : MonoBehaviour
 
     public AppScreen CurrentScreen { get; private set; }
 
-    private static readonly Color PanelColor = new Color(0.04f, 0.06f, 0.09f, 0.92f);
-    private static readonly Color BarColor = new Color(0.04f, 0.06f, 0.09f, 0.75f);
-    private static readonly Color AccentColor = new Color(1f, 0.82f, 0.45f);
-    private static readonly Color ButtonColor = new Color(0.16f, 0.2f, 0.27f, 0.95f);
+    // African theme: dark earth panels, terracotta buttons, gold titles, bone text.
+    private static readonly Color PanelColor = new Color(0.17f, 0.12f, 0.1f, 0.94f);
+    private static readonly Color BarColor = new Color(0.17f, 0.12f, 0.1f, 0.8f);
+    private static readonly Color AccentColor = new Color(1f, 0.8f, 0.42f);
+    private static readonly Color ButtonColor = new Color(0.81f, 0.48f, 0.19f, 0.95f);
 
     private RectTransform safeRoot;
     private Rect appliedSafeArea;
@@ -142,6 +143,7 @@ public class MuralAppUI : MonoBehaviour
 
     private void OnExitPressed()
     {
+        ClearMuralText();
         if (spawner != null)
         {
             spawner.ClearAll();
@@ -189,7 +191,7 @@ public class MuralAppUI : MonoBehaviour
         {
             spawner.Respawn(currentMural);
             currentMural = null;
-            CloseAbout();
+            ClearMuralText();
         }
     }
 
@@ -205,6 +207,15 @@ public class MuralAppUI : MonoBehaviour
         {
             infoPanel.ShowInfo(MuralName(currentMural.data), currentMural.data.description);
             aboutOpen = true;
+        }
+    }
+
+    private void ClearMuralText()
+    {
+        aboutOpen = false;
+        if (infoPanel != null)
+        {
+            infoPanel.ClearAll();
         }
     }
 
@@ -226,9 +237,10 @@ public class MuralAppUI : MonoBehaviour
             return;
         }
 
+        // A different mural: clear the text the previous one left (its info panel and caption).
         if (currentMural != mural)
         {
-            CloseAbout();
+            ClearMuralText();
         }
         currentMural = mural;
         lostMural = null;
@@ -257,7 +269,9 @@ public class MuralAppUI : MonoBehaviour
     private IEnumerator BackToScanLater(MuralExperience mural)
     {
         yield return new WaitForSeconds(lostToScanSeconds);
-        if (lostMural == mural && CurrentScreen == AppScreen.AR)
+        // Only if the mural actually paused for the loss. A mural that keeps playing on purpose
+        // (FlyingCars during its full-screen savanna story) is not interrupted by the scanning screen.
+        if (lostMural == mural && CurrentScreen == AppScreen.AR && mural != null && mural.IsPaused)
         {
             scanTitle.text = "Point your camera back at the mural";
             ShowScreen(AppScreen.Scanning);
@@ -386,7 +400,7 @@ public class MuralAppUI : MonoBehaviour
         scanTitle = MakeText("Title", hintBox.transform, 46f, FontStyles.Bold, Color.white);
         Stretch(scanTitle.rectTransform, 30f, 20f, 30f, 110f);
 
-        TMP_Text scanHint = MakeText("Hint", hintBox.transform, 34f, FontStyles.Normal, new Color(0.85f, 0.88f, 0.92f));
+        TMP_Text scanHint = MakeText("Hint", hintBox.transform, 34f, FontStyles.Normal, new Color(0.96f, 0.94f, 0.91f));
         scanHint.text = "Stand a few steps back so the whole mural fits on the screen.";
         Stretch(scanHint.rectTransform, 30f, 110f, 30f, 20f);
 
@@ -426,7 +440,7 @@ public class MuralAppUI : MonoBehaviour
         muralTitle.alignment = TextAlignmentOptions.Left;
         Stretch(muralTitle.rectTransform, 40f, 20f, 300f, 230f);
 
-        muralLocation = MakeText("MuralLocation", bar.transform, 32f, FontStyles.Normal, new Color(0.85f, 0.88f, 0.92f));
+        muralLocation = MakeText("MuralLocation", bar.transform, 32f, FontStyles.Normal, new Color(0.96f, 0.94f, 0.91f));
         muralLocation.alignment = TextAlignmentOptions.Left;
         Stretch(muralLocation.rectTransform, 40f, 100f, 300f, 170f);
 

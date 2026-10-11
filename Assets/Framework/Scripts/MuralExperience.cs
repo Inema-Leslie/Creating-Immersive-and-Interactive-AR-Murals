@@ -197,6 +197,10 @@ public class MuralExperience : MonoBehaviour
     // Sends a caption to the UI. Logs it when no UI is listening, for example in a sandbox scene.
     protected void ShowCaption(string text)
     {
+        if (!IsOnScreen())
+        {
+            return;
+        }
         if (CaptionRequested != null)
         {
             CaptionRequested(text);
@@ -219,6 +223,10 @@ public class MuralExperience : MonoBehaviour
     // Shows a title and longer text on screen, where it stays readable at any distance.
     protected void ShowInfo(string title, string body)
     {
+        if (!IsOnScreen())
+        {
+            return;
+        }
         if (InfoRequested != null)
         {
             InfoRequested(title, body);
@@ -231,10 +239,17 @@ public class MuralExperience : MonoBehaviour
 
     protected void HideInfo()
     {
-        if (InfoHidden != null)
+        if (IsOnScreen() && InfoHidden != null)
         {
             InfoHidden();
         }
+    }
+
+    // Only the mural the visitor is looking at may put text on screen. A mural that lost tracking
+    // keeps quiet, so its story never shows up over the next one. Sandbox scenes have no spawner.
+    private bool IsOnScreen()
+    {
+        return spawner == null || spawner.ActiveMural == this;
     }
 
     // ---------- Pause and fade ----------
