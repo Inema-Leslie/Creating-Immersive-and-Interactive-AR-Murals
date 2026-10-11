@@ -159,6 +159,7 @@ Everyone works on their own branch and only changes their own mural folder. When
   [African background music](https://pixabay.com/music/supernatural-african-african-background-music-348249/),
   [tribal drums](https://pixabay.com/sound-effects/musical-tribal-drums-526712/),
   [Harambee Africa](https://pixabay.com/music/drum-n-bass-harambee-africa-swahili-drum-and-bass-594062/)
+- Amanirenas character: [Bandit](https://assetstore.unity.com/packages/package/185326) by AlexN, Unity Asset Store
 - Toyota AE86 by IvOfficial and Acacia by Poly by Google, [Poly Pizza](https://poly.pizza) (CC BY)
 - Unity Asset Store: ARCADE - FREE Racing Car, Magic effects pack by Hovl Studio, Grass Flowers FREE by ALP Assets, Unity Particle Pack
 
