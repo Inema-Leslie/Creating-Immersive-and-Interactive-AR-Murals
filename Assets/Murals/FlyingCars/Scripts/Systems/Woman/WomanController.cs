@@ -12,9 +12,13 @@ namespace MuralAR
         public const string WaveParam = "Wave";
         public const string TalkParam = "Talk";
         public const string PointParam = "Point";
+        public const string HappyParam = "Happy";
 
         static readonly int WalkingId = Animator.StringToHash(WalkingParam);
         static readonly int WaveId = Animator.StringToHash(WaveParam);
+        static readonly int TalkId = Animator.StringToHash(TalkParam);
+        static readonly int PointId = Animator.StringToHash(PointParam);
+        static readonly int HappyId = Animator.StringToHash(HappyParam);
 
         [SerializeField] MuralConfig config;
         [SerializeField] MuralTracker tracker;
@@ -39,7 +43,7 @@ namespace MuralAR
         public Transform Woman => _woman != null ? _woman.transform : null;
         public GameObject PaintedTapTarget => _tapTarget;
 
-        public WomanIdleMotion Motion => _motion;
+        public bool IsAnimated => _animator != null;
 
         public Vector3 PortalCentreLocal { get; private set; }
 
@@ -77,15 +81,37 @@ namespace MuralAR
 
         public void HandleTap(GameObject target)
         {
-            if (target == _tapTarget && CanEmerge()) Emerge();
+            if (target == _tapTarget && CanEmerge) Emerge();
             else if (HasEmerged && _womanCollider != null && target == _womanCollider.gameObject)
             {
-                if (_animator != null) _animator.SetTrigger(WaveId);
+                Wave();
                 OnTouched?.Invoke();
             }
         }
 
-        bool CanEmerge() => !HasEmerged && _woman == null &&
+        public void SetWalking(bool walking)
+        {
+            if (_animator != null) _animator.SetBool(WalkingId, walking);
+            if (_motion != null) _motion.Walking = walking;
+        }
+
+        public void SetTalking(bool talking)
+        {
+            if (_animator != null) _animator.SetBool(TalkId, talking);
+        }
+
+        public void Wave() => Trigger(WaveId);
+
+        public void Point() => Trigger(PointId);
+
+        public void Celebrate() => Trigger(HappyId);
+
+        void Trigger(int id)
+        {
+            if (_animator != null) _animator.SetTrigger(id);
+        }
+
+        public bool CanEmerge => !HasEmerged && _woman == null &&
             (experience.State == ExperienceState.Awakening || experience.State == ExperienceState.CarsActive);
 
         public void Emerge()
@@ -106,8 +132,11 @@ namespace MuralAR
             _animator = _woman.GetComponentInChildren<Animator>();
             if (!_woman.TryGetComponent(out _dissolve)) _dissolve = _woman.AddComponent<DissolveController>();
             _modelHeight = MeasureHeight(_woman);
-            _motion = _woman.AddComponent<WomanIdleMotion>();
-            _motion.Init(config, FeetHeight(_woman), _modelHeight);
+            if (_animator == null)
+            {
+                _motion = _woman.AddComponent<WomanIdleMotion>();
+                _motion.Init(config, FeetHeight(_woman), _modelHeight);
+            }
             _dissolve.SetAmount(1f);
 
             float paintedHeight = region.height * size.y;
@@ -132,8 +161,7 @@ namespace MuralAR
             float dissolveSeconds = config.emergenceSeconds * config.emergenceDissolveShare;
             yield return _dissolve.Animate(1f, 0f, dissolveSeconds);
 
-            if (_animator != null) _animator.SetBool(WalkingId, true);
-            _motion.Walking = true;
+            SetWalking(true);
             float walkSeconds = config.emergenceSeconds - dissolveSeconds;
             var startRotation = _woman.transform.localRotation;
             for (float t = 0f; t < walkSeconds; t += Time.deltaTime)
@@ -144,8 +172,7 @@ namespace MuralAR
                 _woman.transform.localRotation = Quaternion.Slerp(startRotation, FacingCamera(anchor), k);
                 yield return null;
             }
-            if (_animator != null) _animator.SetBool(WalkingId, false);
-            _motion.Walking = false;
+            SetWalking(false);
 
             _woman.transform.SetParent(null, true);
             var worldUp = _woman.transform.eulerAngles;

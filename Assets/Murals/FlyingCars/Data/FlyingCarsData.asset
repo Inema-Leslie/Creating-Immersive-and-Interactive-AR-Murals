@@ -19,6 +19,13 @@ MonoBehaviour:
   displayTitle: Flying Cars
   location: Learning Commons, opposite Mozambique
   transformations: 0300000000000000
-  description: 'Cars fly out of the mural, Amanirenas steps through a golden portal and the scene turns into a savanna at nightfall. AR experience by Gama. For the story behind the mural, ask ALU guest relations.'
-  captions: []
+  description: Cars fly out of the mural, Amanirenas steps through a golden portal
+    and the scene turns into a savanna at nightfall. AR experience by Gama. For the
+    story behind the mural, ask ALU guest relations.
+  captions:
+  - The painted cars are waking up.
+  - Tap, hold, swipe or double-tap a car. Tap the painted woman to call AMANIRENAS.
+  - AMANIRENAS steps through the golden portal.
+  - Welcome to the savanna. Listen to her story.
+  - Back in the courtyard. Tap AMANIRENAS to say hello.
   scanHint: Stand a few metres back, facing the whole mural.
