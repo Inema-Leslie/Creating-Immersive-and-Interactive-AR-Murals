@@ -5,7 +5,7 @@ using TMPro;
 
 // On-screen text for every mural: a caption line at the bottom and an info panel for stories.
 // Listens to MuralExperience events, so mural scripts never reference the UI directly.
-// Builds its own simple layout; the UI design can restyle or replace it by listening to the same events.
+// Builds its layout in code from the pieces in MuralTheme, so it matches the app screens.
 public class MuralInfoPanel : MonoBehaviour
 {
     [Tooltip("Seconds a caption stays on screen.")]
@@ -17,6 +17,12 @@ public class MuralInfoPanel : MonoBehaviour
     private TMP_Text infoTitle;
     private TMP_Text infoBody;
     private Coroutine captionRoutine;
+
+    // Sizes in canvas units (the canvas is 1080 by 1920).
+    private const float CaptionBottom = 60f;
+    private const float CaptionHeight = 150f;
+    private const float InfoBottom = 200f;
+    private const float InfoHeight = 620f;
 
     private void Awake()
     {
@@ -86,9 +92,9 @@ public class MuralInfoPanel : MonoBehaviour
     private void PlaceCaption()
     {
         RectTransform rect = captionBox.GetComponent<RectTransform>();
-        float bottom = infoBox.activeSelf ? 800f : 60f;
+        float bottom = infoBox.activeSelf ? InfoBottom + InfoHeight + 20f : CaptionBottom;
         rect.offsetMin = new Vector2(rect.offsetMin.x, bottom);
-        rect.offsetMax = new Vector2(rect.offsetMax.x, bottom + 140f);
+        rect.offsetMax = new Vector2(rect.offsetMax.x, bottom + CaptionHeight);
     }
 
     private IEnumerator HideCaptionLater()
@@ -111,65 +117,39 @@ public class MuralInfoPanel : MonoBehaviour
         scaler.referenceResolution = new Vector2(1080f, 1920f);
         scaler.matchWidthOrHeight = 0.5f;
 
-        // Caption: one short line near the bottom of the screen.
-        captionBox = MakeBox("Caption", canvasObject.transform, 40f, 60f, 140f);
-        captionText = MakeText("Text", captionBox.transform, 42f, FontStyles.Normal, Color.white);
-        captionText.alignment = TextAlignmentOptions.Center;
-        Fill(captionText.rectTransform, 30f, 15f, 30f, 15f);
+        Color deep = new Color(MuralTheme.EarthDeep.r, MuralTheme.EarthDeep.g, MuralTheme.EarthDeep.b, 0.93f);
 
-        // Info panel: title and story, above the caption.
-        infoBox = MakeBox("Info", canvasObject.transform, 40f, 220f, 560f);
-        infoTitle = MakeText("Title", infoBox.transform, 56f, FontStyles.Bold, new Color(1f, 0.8f, 0.42f));
-        Fill(infoTitle.rectTransform, 40f, 30f, 40f, 440f);
-        infoBody = MakeText("Body", infoBox.transform, 38f, FontStyles.Normal, Color.white);
-        Fill(infoBody.rectTransform, 40f, 120f, 40f, 30f);
+        // Caption: one short line near the bottom of the screen, in a rounded box with a gold edge.
+        RectTransform captionInside = MuralTheme.MakeCard("Caption", canvasObject.transform, deep, MuralTheme.Gold, 3f, 30f);
+        captionBox = captionInside.parent.gameObject;
+        MuralTheme.PinBottom((RectTransform)captionBox.transform, CaptionBottom, CaptionHeight, 40f);
+        captionText = MuralTheme.MakeText("Text", captionInside, "", 40f, false, MuralTheme.Bone);
+        MuralTheme.Stretch(captionText.rectTransform, 30f, 12f, 30f, 12f);
+        captionText.enableAutoSizing = true;
+        captionText.fontSizeMin = 26f;
+        captionText.fontSizeMax = 40f;
+
+        // Info panel: mudcloth border on top, then the title and the story.
+        RectTransform infoInside = MuralTheme.MakeCard("Info", canvasObject.transform, deep, MuralTheme.Terracotta, 4f, 36f);
+        infoBox = infoInside.parent.gameObject;
+        MuralTheme.PinBottom((RectTransform)infoBox.transform, InfoBottom, InfoHeight, 40f);
+
+        RawImage band = MuralTheme.MakeBand("Band", infoInside);
+        MuralTheme.PinTop(band.rectTransform, 22f, 44f, 50f);
+
+        infoTitle = MuralTheme.MakeText("Title", infoInside, "", 50f, true, MuralTheme.Gold);
+        infoTitle.alignment = TextAlignmentOptions.Left;
+        MuralTheme.PinTop(infoTitle.rectTransform, 84f, 80f, 44f);
+        infoTitle.enableAutoSizing = true;
+        infoTitle.fontSizeMin = 34f;
+        infoTitle.fontSizeMax = 50f;
+
+        infoBody = MuralTheme.MakeText("Body", infoInside, "", 36f, false, MuralTheme.Bone);
+        infoBody.alignment = TextAlignmentOptions.TopLeft;
+        MuralTheme.Stretch(infoBody.rectTransform, 44f, 176f, 44f, 34f);
         // Long stories shrink to fit inside the panel instead of running out of it.
         infoBody.enableAutoSizing = true;
         infoBody.fontSizeMin = 24f;
-        infoBody.fontSizeMax = 38f;
-        captionText.enableAutoSizing = true;
-        captionText.fontSizeMin = 26f;
-        captionText.fontSizeMax = 42f;
-    }
-
-    // A dark box stretched across the screen width, a set distance from the bottom.
-    private GameObject MakeBox(string name, Transform parent, float sideMargin, float bottom, float height)
-    {
-        GameObject box = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Outline));
-        box.transform.SetParent(parent, false);
-        RectTransform rect = box.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0f, 0f);
-        rect.anchorMax = new Vector2(1f, 0f);
-        rect.pivot = new Vector2(0.5f, 0f);
-        rect.offsetMin = new Vector2(sideMargin, bottom);
-        rect.offsetMax = new Vector2(-sideMargin, bottom + height);
-        Image image = box.GetComponent<Image>();
-        image.color = new Color(0.17f, 0.12f, 0.1f, 0.9f);
-        image.raycastTarget = false;
-        Outline outline = box.GetComponent<Outline>();
-        outline.effectColor = new Color(0.81f, 0.48f, 0.19f, 1f);
-        outline.effectDistance = new Vector2(3f, -3f);
-        return box;
-    }
-
-    private TMP_Text MakeText(string name, Transform parent, float size, FontStyles style, Color color)
-    {
-        GameObject textObject = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
-        textObject.transform.SetParent(parent, false);
-        TextMeshProUGUI text = textObject.GetComponent<TextMeshProUGUI>();
-        text.fontSize = size;
-        text.fontStyle = style;
-        text.color = color;
-        text.raycastTarget = false;
-        return text;
-    }
-
-    // Stretches a rect to fill its parent with padding (left, top, right, bottom).
-    private void Fill(RectTransform rect, float left, float top, float right, float bottom)
-    {
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = new Vector2(left, bottom);
-        rect.offsetMax = new Vector2(-right, -top);
+        infoBody.fontSizeMax = 36f;
     }
 }

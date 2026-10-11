@@ -158,4 +158,7 @@ Everyone works on their own branch and only changes their own mural folder. When
 - Toyota AE86 by IvOfficial and Acacia by Poly by Google, [Poly Pizza](https://poly.pizza) (CC BY)
 - Unity Asset Store: ARCADE - FREE Racing Car, Magic effects pack by Hovl Studio, Grass Flowers FREE by ALP Assets, Unity Particle Pack
 
+**App screens**
+- Font: [Poppins](https://fonts.google.com/specimen/Poppins) by the Poppins Project Authors (SIL Open Font License)
+
 All mural photos and tracking images were taken by the team.

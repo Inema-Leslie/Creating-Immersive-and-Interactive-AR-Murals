@@ -8,7 +8,7 @@ using TMPro;
 
 // The four app screens: Start, Scanning, AR and Exit.
 // Listens to MuralSpawner events, so mural scripts never need to know about these screens.
-// Builds its own simple layout in code, like MuralInfoPanel.
+// Builds its layout in code from the pieces in MuralTheme, like MuralInfoPanel.
 public class MuralAppUI : MonoBehaviour
 {
     public enum AppScreen
@@ -35,13 +35,9 @@ public class MuralAppUI : MonoBehaviour
 
     public AppScreen CurrentScreen { get; private set; }
 
-    // African theme: dark earth panels, terracotta buttons, gold titles, bone text.
-    private static readonly Color PanelColor = new Color(0.17f, 0.12f, 0.1f, 0.94f);
-    private static readonly Color BarColor = new Color(0.17f, 0.12f, 0.1f, 0.8f);
-    private static readonly Color AccentColor = new Color(1f, 0.8f, 0.42f);
-    private static readonly Color ButtonColor = new Color(0.81f, 0.48f, 0.19f, 0.95f);
-
-    private RectTransform safeRoot;
+    // Colours, fonts and patterns come from MuralTheme.
+    private Transform canvasRoot;
+    private readonly List<RectTransform> safeAreas = new List<RectTransform>();
     private Rect appliedSafeArea;
 
     private GameObject startScreen;
@@ -153,7 +149,7 @@ public class MuralAppUI : MonoBehaviour
         lostMural = null;
 
         int total = spawner != null ? spawner.murals.Count : 0;
-        exitSummary.text = "You explored " + visited.Count + " of " + total + " murals.\n\n"
+        exitSummary.text = "You explored " + visited.Count + " of " + total + " murals.\n"
             + "To learn more about a mural, ask ALU guest relations.";
         ShowScreen(AppScreen.Exit);
     }
@@ -321,10 +317,13 @@ public class MuralAppUI : MonoBehaviour
             return;
         }
         appliedSafeArea = area;
-        safeRoot.anchorMin = new Vector2(area.xMin / Screen.width, area.yMin / Screen.height);
-        safeRoot.anchorMax = new Vector2(area.xMax / Screen.width, area.yMax / Screen.height);
-        safeRoot.offsetMin = Vector2.zero;
-        safeRoot.offsetMax = Vector2.zero;
+        foreach (RectTransform content in safeAreas)
+        {
+            content.anchorMin = new Vector2(area.xMin / Screen.width, area.yMin / Screen.height);
+            content.anchorMax = new Vector2(area.xMax / Screen.width, area.yMax / Screen.height);
+            content.offsetMin = Vector2.zero;
+            content.offsetMax = Vector2.zero;
+        }
     }
 
     // ---------- Layout ----------
@@ -340,11 +339,7 @@ public class MuralAppUI : MonoBehaviour
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1080f, 1920f);
         scaler.matchWidthOrHeight = 0.5f;
-
-        GameObject safeObject = new GameObject("SafeArea", typeof(RectTransform));
-        safeObject.transform.SetParent(canvasObject.transform, false);
-        safeRoot = safeObject.GetComponent<RectTransform>();
-        Stretch(safeRoot, 0f, 0f, 0f, 0f);
+        canvasRoot = canvasObject.transform;
 
         BuildStartScreen();
         BuildScanScreen();
@@ -352,192 +347,216 @@ public class MuralAppUI : MonoBehaviour
         BuildExitScreen();
     }
 
-    private void BuildStartScreen()
+    // A screen fills the whole display. Backgrounds go on the screen itself; buttons and text go in
+    // the returned content area, which stays inside the safe area (away from the notch).
+    private GameObject MakeScreen(string name, out RectTransform content)
     {
-        startScreen = MakePanel("StartScreen", PanelColor);
-
-        TMP_Text title = MakeText("Title", startScreen.transform, 96f, FontStyles.Bold, AccentColor);
-        title.text = appTitle;
-        Place(title.rectTransform, 0.5f, 0.68f, 960f, 160f);
-
-        TMP_Text welcome = MakeText("Welcome", startScreen.transform, 44f, FontStyles.Normal, Color.white);
-        welcome.text = welcomeText;
-        Place(welcome.rectTransform, 0.5f, 0.55f, 900f, 220f);
-
-        startButton = MakeButton("StartButton", startScreen.transform, "Start", OnStartPressed);
-        Place(startButton.GetComponent<RectTransform>(), 0.5f, 0.38f, 560f, 150f);
-
-        startStatus = MakeText("Status", startScreen.transform, 34f, FontStyles.Italic, new Color(1f, 0.6f, 0.55f));
-        startStatus.text = "";
-        Place(startStatus.rectTransform, 0.5f, 0.28f, 900f, 140f);
+        RectTransform screen = MuralTheme.MakeRect(name, canvasRoot);
+        MuralTheme.Stretch(screen, 0f, 0f, 0f, 0f);
+        content = MuralTheme.MakeRect("Content", screen);
+        MuralTheme.Stretch(content, 0f, 0f, 0f, 0f);
+        safeAreas.Add(content);
+        return screen.gameObject;
     }
 
+    private static Color Deep(float alpha)
+    {
+        return new Color(MuralTheme.EarthDeep.r, MuralTheme.EarthDeep.g, MuralTheme.EarthDeep.b, alpha);
+    }
+
+    // Start: the rock art pattern, mudcloth borders at the top and bottom, and a card in the middle.
+    private void BuildStartScreen()
+    {
+        RectTransform content;
+        startScreen = MakeScreen("StartScreen", out content);
+        Transform screen = startScreen.transform;
+
+        RawImage pattern = MuralTheme.MakePattern("RockArt", screen, "Theme_RockArt", PatternFill.FillMode.RepeatBoth, MuralTheme.RockArtAspect, 620f);
+        MuralTheme.Stretch(pattern.rectTransform, 0f, 0f, 0f, 0f);
+        pattern.raycastTarget = true;
+        pattern.transform.SetSiblingIndex(0);
+        RawImage fade = MuralTheme.MakeFade("Fade", screen, Deep(0.85f));
+        MuralTheme.Stretch(fade.rectTransform, 0f, 0f, 0f, 0f);
+        fade.transform.SetSiblingIndex(1);
+        AddScreenBorders(screen);
+        content.SetAsLastSibling();
+
+        RectTransform card = MuralTheme.MakeCard("Card", content, Deep(0.95f), MuralTheme.Terracotta, 5f, 44f);
+        MuralTheme.Place((RectTransform)card.parent, 0.5f, 0.48f, 940f, 1060f);
+
+        TMP_Text label = MuralTheme.MakeText("Label", card, "ALU CAMPUS", 34f, true, MuralTheme.Gold);
+        label.characterSpacing = 24f;
+        MuralTheme.PinTop(label.rectTransform, 80f, 60f, 40f);
+
+        TMP_Text title = MuralTheme.MakeText("Title", card, appTitle, 120f, true, MuralTheme.Bone);
+        MuralTheme.PinTop(title.rectTransform, 150f, 170f, 40f);
+
+        RawImage divider = MuralTheme.MakeBand("Divider", card);
+        MuralTheme.PinTop(divider.rectTransform, 345f, 64f, 90f);
+
+        TMP_Text welcome = MuralTheme.MakeText("Welcome", card, welcomeText, 40f, false, MuralTheme.BoneSoft);
+        MuralTheme.PinTop(welcome.rectTransform, 445f, 170f, 80f);
+
+        int total = spawner != null ? spawner.murals.Count : 5;
+        TMP_Text count = MuralTheme.MakeText("Count", card, total + " murals to discover", 34f, true, MuralTheme.Gold);
+        MuralTheme.PinTop(count.rectTransform, 625f, 60f, 60f);
+
+        startButton = MuralTheme.MakeButton("StartButton", card, "Start exploring", true, OnStartPressed);
+        MuralTheme.PinBottom((RectTransform)startButton.transform, 140f, 150f, 130f);
+
+        startStatus = MuralTheme.MakeText("Status", card, "", 30f, false, new Color(1f, 0.66f, 0.58f));
+        MuralTheme.PinBottom(startStatus.rectTransform, 30f, 100f, 60f);
+    }
+
+    // Scanning: the camera stays visible. A gold viewfinder in the middle and a hint card at the bottom.
     private void BuildScanScreen()
     {
-        scanScreen = MakePanel("ScanScreen", new Color(0f, 0f, 0f, 0f));
+        RectTransform content;
+        scanScreen = MakeScreen("ScanScreen", out content);
 
         // Four corner brackets around the middle of the screen, like a camera viewfinder.
         float size = 760f;
-        float arm = 140f;
-        float thickness = 12f;
+        float arm = 150f;
+        float thickness = 14f;
         for (int i = 0; i < 4; i++)
         {
             float x = (i % 2 == 0) ? -1f : 1f;
             float y = (i < 2) ? 1f : -1f;
             Vector2 corner = new Vector2(x * size * 0.5f, y * size * 0.5f);
-            AddCornerBar(corner + new Vector2(-x * arm * 0.5f, 0f), new Vector2(arm, thickness));
-            AddCornerBar(corner + new Vector2(0f, -y * arm * 0.5f), new Vector2(thickness, arm));
+            AddCornerBar(content, corner + new Vector2(-x * (arm - thickness) * 0.5f, 0f), new Vector2(arm, thickness));
+            AddCornerBar(content, corner + new Vector2(0f, -y * (arm - thickness) * 0.5f), new Vector2(thickness, arm));
         }
 
-        GameObject hintBox = MakeBox("HintBox", scanScreen.transform, BarColor);
-        RectTransform hintRect = hintBox.GetComponent<RectTransform>();
-        hintRect.anchorMin = new Vector2(0f, 0f);
-        hintRect.anchorMax = new Vector2(1f, 0f);
-        hintRect.pivot = new Vector2(0.5f, 0f);
-        hintRect.offsetMin = new Vector2(40f, 80f);
-        hintRect.offsetMax = new Vector2(-40f, 300f);
+        Button exit = MuralTheme.MakeButton("ExitButton", content, "Exit", false, OnExitPressed);
+        PlaceTopRight((RectTransform)exit.transform, 220f, 110f);
 
-        scanTitle = MakeText("Title", hintBox.transform, 46f, FontStyles.Bold, Color.white);
-        Stretch(scanTitle.rectTransform, 30f, 20f, 30f, 110f);
+        RectTransform card = MuralTheme.MakeCard("HintCard", content, Deep(0.92f), MuralTheme.Terracotta, 4f, 36f);
+        MuralTheme.PinBottom((RectTransform)card.parent, 60f, 300f, 40f);
 
-        TMP_Text scanHint = MakeText("Hint", hintBox.transform, 34f, FontStyles.Normal, new Color(0.96f, 0.94f, 0.91f));
-        scanHint.text = "Stand a few steps back so the whole mural fits on the screen.";
-        Stretch(scanHint.rectTransform, 30f, 110f, 30f, 20f);
+        RawImage band = MuralTheme.MakeBand("Band", card);
+        MuralTheme.PinTop(band.rectTransform, 24f, 50f, 60f);
 
-        Button exit = MakeButton("ExitButton", scanScreen.transform, "Exit", OnExitPressed);
-        PlaceTopRight(exit.GetComponent<RectTransform>(), 240f, 110f);
+        scanTitle = MuralTheme.MakeText("Title", card, "", 44f, true, MuralTheme.Bone);
+        MuralTheme.PinTop(scanTitle.rectTransform, 90f, 80f, 30f);
+
+        TMP_Text hint = MuralTheme.MakeText("Hint", card, "Stand a few steps back so the whole mural fits on the screen.", 32f, false, MuralTheme.BoneSoft);
+        MuralTheme.PinTop(hint.rectTransform, 170f, 100f, 50f);
     }
 
-    private void AddCornerBar(Vector2 position, Vector2 size)
+    private void AddCornerBar(Transform parent, Vector2 position, Vector2 size)
     {
-        GameObject bar = new GameObject("Corner", typeof(RectTransform), typeof(Image));
-        bar.transform.SetParent(scanScreen.transform, false);
-        RectTransform rect = bar.GetComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0.5f, 0.55f);
-        rect.anchorMax = new Vector2(0.5f, 0.55f);
+        RectTransform rect = MuralTheme.MakeRect("Corner", parent);
+        rect.anchorMin = new Vector2(0.5f, 0.56f);
+        rect.anchorMax = new Vector2(0.5f, 0.56f);
         rect.sizeDelta = size;
         rect.anchoredPosition = position;
-        Image image = bar.GetComponent<Image>();
-        image.color = AccentColor;
-        image.raycastTarget = false;
+        Image image = rect.gameObject.AddComponent<Image>();
+        MuralTheme.SetRounded(image, MuralTheme.Gold, 6f);
         scanCorners.Add(image);
     }
 
+    // AR: a card at the top with the mural name, its place on campus and the buttons.
+    // The bottom of the screen is left free for captions and stories.
     private void BuildARScreen()
     {
-        arScreen = MakePanel("ARScreen", new Color(0f, 0f, 0f, 0f));
+        RectTransform content;
+        arScreen = MakeScreen("ARScreen", out content);
 
-        // Title bar at the top. The bottom of the screen is left free for captions and stories.
-        GameObject bar = MakeBox("TopBar", arScreen.transform, BarColor);
-        RectTransform barRect = bar.GetComponent<RectTransform>();
-        barRect.anchorMin = new Vector2(0f, 1f);
-        barRect.anchorMax = new Vector2(1f, 1f);
-        barRect.pivot = new Vector2(0.5f, 1f);
-        barRect.offsetMin = new Vector2(0f, -330f);
-        barRect.offsetMax = new Vector2(0f, 0f);
+        RectTransform card = MuralTheme.MakeCard("TopCard", content, Deep(0.88f), MuralTheme.Terracotta, 4f, 36f);
+        MuralTheme.PinTop((RectTransform)card.parent, 24f, 360f, 24f);
 
-        muralTitle = MakeText("MuralTitle", bar.transform, 54f, FontStyles.Bold, AccentColor);
+        muralTitle = MuralTheme.MakeText("MuralTitle", card, "", 54f, true, MuralTheme.Gold);
         muralTitle.alignment = TextAlignmentOptions.Left;
-        Stretch(muralTitle.rectTransform, 40f, 20f, 300f, 230f);
+        muralTitle.textWrappingMode = TextWrappingModes.NoWrap;
+        muralTitle.overflowMode = TextOverflowModes.Ellipsis;
+        MuralTheme.PinTop(muralTitle.rectTransform, 26f, 76f, 36f);
+        muralTitle.rectTransform.offsetMax = new Vector2(-270f, muralTitle.rectTransform.offsetMax.y);
 
-        muralLocation = MakeText("MuralLocation", bar.transform, 32f, FontStyles.Normal, new Color(0.96f, 0.94f, 0.91f));
+        muralLocation = MuralTheme.MakeText("MuralLocation", card, "", 30f, false, MuralTheme.BoneSoft);
         muralLocation.alignment = TextAlignmentOptions.Left;
-        Stretch(muralLocation.rectTransform, 40f, 100f, 300f, 170f);
+        muralLocation.textWrappingMode = TextWrappingModes.NoWrap;
+        muralLocation.overflowMode = TextOverflowModes.Ellipsis;
+        muralLocation.enableAutoSizing = true;
+        muralLocation.fontSizeMin = 22f;
+        muralLocation.fontSizeMax = 30f;
+        MuralTheme.PinTop(muralLocation.rectTransform, 104f, 50f, 36f);
+        muralLocation.rectTransform.offsetMax = new Vector2(-270f, muralLocation.rectTransform.offsetMax.y);
 
-        Button exit = MakeButton("ExitButton", bar.transform, "Exit", OnExitPressed);
-        PlaceTopRight(exit.GetComponent<RectTransform>(), 240f, 110f);
+        Button exit = MuralTheme.MakeButton("ExitButton", card, "Exit", false, OnExitPressed);
+        PlaceTopRight((RectTransform)exit.transform, 210f, 100f);
 
-        Button about = MakeButton("AboutButton", bar.transform, "About", OnAboutPressed);
-        RectTransform aboutRect = about.GetComponent<RectTransform>();
+        Button about = MuralTheme.MakeButton("AboutButton", card, "About", true, OnAboutPressed);
+        RectTransform aboutRect = (RectTransform)about.transform;
         aboutRect.anchorMin = new Vector2(0f, 0f);
         aboutRect.anchorMax = new Vector2(0.5f, 0f);
-        aboutRect.offsetMin = new Vector2(40f, 30f);
-        aboutRect.offsetMax = new Vector2(-15f, 140f);
+        aboutRect.offsetMin = new Vector2(30f, 62f);
+        aboutRect.offsetMax = new Vector2(-12f, 172f);
 
-        Button replay = MakeButton("ReplayButton", bar.transform, "Replay", OnReplayPressed);
-        RectTransform replayRect = replay.GetComponent<RectTransform>();
+        Button replay = MuralTheme.MakeButton("ReplayButton", card, "Replay", false, OnReplayPressed);
+        RectTransform replayRect = (RectTransform)replay.transform;
         replayRect.anchorMin = new Vector2(0.5f, 0f);
         replayRect.anchorMax = new Vector2(1f, 0f);
-        replayRect.offsetMin = new Vector2(15f, 30f);
-        replayRect.offsetMax = new Vector2(-40f, 140f);
+        replayRect.offsetMin = new Vector2(12f, 62f);
+        replayRect.offsetMax = new Vector2(-30f, 172f);
+
+        RawImage band = MuralTheme.MakeBand("Band", card);
+        MuralTheme.PinBottom(band.rectTransform, 14f, 34f, 40f);
     }
 
+    // Exit: the cut-out pattern in dark earth tones, the same borders as Start, and a thank-you card.
     private void BuildExitScreen()
     {
-        exitScreen = MakePanel("ExitScreen", PanelColor);
+        RectTransform content;
+        exitScreen = MakeScreen("ExitScreen", out content);
+        Transform screen = exitScreen.transform;
 
-        TMP_Text title = MakeText("Title", exitScreen.transform, 80f, FontStyles.Bold, AccentColor);
-        title.text = "Thanks for visiting";
-        Place(title.rectTransform, 0.5f, 0.68f, 960f, 150f);
+        RawImage pattern = MuralTheme.MakePattern("Cutouts", screen, "Theme_Cutouts", PatternFill.FillMode.RepeatBoth, MuralTheme.CutoutsAspect, 1900f);
+        MuralTheme.Stretch(pattern.rectTransform, 0f, 0f, 0f, 0f);
+        pattern.raycastTarget = true;
+        pattern.transform.SetSiblingIndex(0);
+        RawImage fade = MuralTheme.MakeFade("Fade", screen, Deep(0.7f));
+        MuralTheme.Stretch(fade.rectTransform, 0f, 0f, 0f, 0f);
+        fade.transform.SetSiblingIndex(1);
+        AddScreenBorders(screen);
+        content.SetAsLastSibling();
 
-        exitSummary = MakeText("Summary", exitScreen.transform, 42f, FontStyles.Normal, Color.white);
-        Place(exitSummary.rectTransform, 0.5f, 0.54f, 900f, 260f);
+        RectTransform card = MuralTheme.MakeCard("Card", content, Deep(0.95f), MuralTheme.Terracotta, 5f, 44f);
+        MuralTheme.Place((RectTransform)card.parent, 0.5f, 0.48f, 940f, 1100f);
 
-        Button again = MakeButton("ScanAgainButton", exitScreen.transform, "Scan again", OnScanAgainPressed);
-        Place(again.GetComponent<RectTransform>(), 0.5f, 0.38f, 560f, 150f);
+        TMP_Text label = MuralTheme.MakeText("Label", card, "SEE YOU AGAIN", 34f, true, MuralTheme.Gold);
+        label.characterSpacing = 24f;
+        MuralTheme.PinTop(label.rectTransform, 80f, 60f, 40f);
 
-        Button close = MakeButton("CloseButton", exitScreen.transform, "Close app", OnClosePressed);
-        Place(close.GetComponent<RectTransform>(), 0.5f, 0.28f, 560f, 150f);
+        TMP_Text title = MuralTheme.MakeText("Title", card, "Thanks for visiting", 84f, true, MuralTheme.Bone);
+        MuralTheme.PinTop(title.rectTransform, 150f, 200f, 50f);
+
+        RawImage divider = MuralTheme.MakeBand("Divider", card);
+        MuralTheme.PinTop(divider.rectTransform, 370f, 64f, 90f);
+
+        exitSummary = MuralTheme.MakeText("Summary", card, "", 36f, false, MuralTheme.BoneSoft);
+        MuralTheme.PinTop(exitSummary.rectTransform, 465f, 190f, 80f);
+
+        Button again = MuralTheme.MakeButton("ScanAgainButton", card, "Scan again", true, OnScanAgainPressed);
+        MuralTheme.PinBottom((RectTransform)again.transform, 200f, 140f, 130f);
+
+        Button close = MuralTheme.MakeButton("CloseButton", card, "Close app", false, OnClosePressed);
+        MuralTheme.PinBottom((RectTransform)close.transform, 44f, 130f, 130f);
     }
 
-    // A screen that fills the safe area.
-    private GameObject MakePanel(string name, Color color)
+    // Mudcloth borders along the top and bottom edges of a full screen, each with a thin terracotta line.
+    private void AddScreenBorders(Transform screen)
     {
-        GameObject panel = MakeBox(name, safeRoot, color);
-        Stretch(panel.GetComponent<RectTransform>(), 0f, 0f, 0f, 0f);
-        // A see-through screen must let taps reach the murals behind it.
-        panel.GetComponent<Image>().raycastTarget = color.a > 0f;
-        return panel;
-    }
+        RawImage top = MuralTheme.MakeBand("TopBorder", screen);
+        MuralTheme.PinTop(top.rectTransform, 0f, 120f, 0f);
+        RectTransform topLine = MuralTheme.MakeRect("TopLine", screen);
+        MuralTheme.PinTop(topLine, 120f, 8f, 0f);
+        topLine.gameObject.AddComponent<Image>().color = MuralTheme.Terracotta;
 
-    private GameObject MakeBox(string name, Transform parent, Color color)
-    {
-        GameObject box = new GameObject(name, typeof(RectTransform), typeof(Image));
-        box.transform.SetParent(parent, false);
-        Image image = box.GetComponent<Image>();
-        image.color = color;
-        image.raycastTarget = false;
-        return box;
-    }
-
-    private TMP_Text MakeText(string name, Transform parent, float size, FontStyles style, Color color)
-    {
-        GameObject textObject = new GameObject(name, typeof(RectTransform), typeof(TextMeshProUGUI));
-        textObject.transform.SetParent(parent, false);
-        TextMeshProUGUI text = textObject.GetComponent<TextMeshProUGUI>();
-        text.fontSize = size;
-        text.fontStyle = style;
-        text.color = color;
-        text.alignment = TextAlignmentOptions.Center;
-        text.textWrappingMode = TextWrappingModes.Normal;
-        text.raycastTarget = false;
-        return text;
-    }
-
-    private Button MakeButton(string name, Transform parent, string label, UnityEngine.Events.UnityAction onClick)
-    {
-        GameObject buttonObject = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
-        buttonObject.transform.SetParent(parent, false);
-        Image image = buttonObject.GetComponent<Image>();
-        image.color = ButtonColor;
-        Button button = buttonObject.GetComponent<Button>();
-        button.targetGraphic = image;
-        button.onClick.AddListener(onClick);
-
-        TMP_Text text = MakeText("Label", buttonObject.transform, 44f, FontStyles.Bold, Color.white);
-        text.text = label;
-        Stretch(text.rectTransform, 10f, 10f, 10f, 10f);
-        return button;
-    }
-
-    // Centers a rect at a point given as a fraction of the screen (0 to 1), with a fixed size.
-    private void Place(RectTransform rect, float x, float y, float width, float height)
-    {
-        rect.anchorMin = new Vector2(x, y);
-        rect.anchorMax = new Vector2(x, y);
-        rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.sizeDelta = new Vector2(width, height);
-        rect.anchoredPosition = Vector2.zero;
+        RawImage bottom = MuralTheme.MakeBand("BottomBorder", screen);
+        MuralTheme.PinBottom(bottom.rectTransform, 0f, 120f, 0f);
+        RectTransform bottomLine = MuralTheme.MakeRect("BottomLine", screen);
+        MuralTheme.PinBottom(bottomLine, 120f, 8f, 0f);
+        bottomLine.gameObject.AddComponent<Image>().color = MuralTheme.Terracotta;
     }
 
     private void PlaceTopRight(RectTransform rect, float width, float height)
@@ -546,15 +565,6 @@ public class MuralAppUI : MonoBehaviour
         rect.anchorMax = new Vector2(1f, 1f);
         rect.pivot = new Vector2(1f, 1f);
         rect.sizeDelta = new Vector2(width, height);
-        rect.anchoredPosition = new Vector2(-30f, -30f);
-    }
-
-    // Stretches a rect to fill its parent with padding (left, top, right, bottom).
-    private void Stretch(RectTransform rect, float left, float top, float right, float bottom)
-    {
-        rect.anchorMin = Vector2.zero;
-        rect.anchorMax = Vector2.one;
-        rect.offsetMin = new Vector2(left, bottom);
-        rect.offsetMax = new Vector2(-right, -top);
+        rect.anchoredPosition = new Vector2(-28f, -28f);
     }
 }
