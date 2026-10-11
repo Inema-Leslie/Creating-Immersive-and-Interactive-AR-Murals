@@ -19,7 +19,15 @@ MonoBehaviour:
   displayTitle: Convention Center
   location: In front of reception
   transformations: 0000000004000000
-  description: 'The dome lights up, the tower and cups rise and a plant grows out of the wall. AR experience by Brian. For the story behind the mural, ask ALU guest relations.'
+  description: "The Kigali Convention Centre opened in July 2016 and quickly became a landmark of the city. German architect Roland Dieterle designed it so that Kigali would have a building people recognise at a glance.
+
+Its dome was inspired by the round houses of Rwandan tradition, such as the dome-shaped King's Palace.
+
+The dome is a steel frame covered in a see-through skin and stands close to 40 metres high. The main hall underneath can hold up to 2,600 people.
+
+At night, lights turn the dome blue, yellow and green, the colours of the Rwandan flag. Since 2024 it has also appeared on the 5,000 franc banknote.
+
+AR experience by Brian. For the story behind the mural itself, ask ALU guest relations."
   captions:
   - Watch the dome rise out of the wall.
   - Tap the dome to change the lights, the tower cups for day or night, and the plant

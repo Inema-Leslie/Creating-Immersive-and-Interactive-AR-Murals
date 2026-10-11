@@ -16,7 +16,14 @@ public class MuralInfoPanel : MonoBehaviour
     private GameObject infoBox;
     private TMP_Text infoTitle;
     private TMP_Text infoBody;
+    private ScrollRect infoScroll;
     private Coroutine captionRoutine;
+
+    // True while the info panel is on screen.
+    public bool IsInfoOpen
+    {
+        get { return infoBox != null && infoBox.activeSelf; }
+    }
 
     // Sizes in canvas units (the canvas is 1080 by 1920).
     private const float CaptionBottom = 60f;
@@ -62,6 +69,9 @@ public class MuralInfoPanel : MonoBehaviour
         infoTitle.text = title;
         infoBody.text = body;
         infoBox.SetActive(true);
+        // Long stories scroll; every new one starts at the top.
+        Canvas.ForceUpdateCanvases();
+        infoScroll.verticalNormalizedPosition = 1f;
         PlaceCaption();
     }
 
@@ -107,7 +117,8 @@ public class MuralInfoPanel : MonoBehaviour
 
     private void BuildLayout()
     {
-        GameObject canvasObject = new GameObject("MuralInfoCanvas", typeof(Canvas), typeof(CanvasScaler));
+        // The raycaster lets the Close button and scrolling work. The hidden panel blocks nothing.
+        GameObject canvasObject = new GameObject("MuralInfoCanvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         canvasObject.transform.SetParent(transform, false);
         Canvas canvas = canvasObject.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -137,19 +148,47 @@ public class MuralInfoPanel : MonoBehaviour
         RawImage band = MuralTheme.MakeBand("Band", infoInside);
         MuralTheme.PinTop(band.rectTransform, 22f, 44f, 50f);
 
-        infoTitle = MuralTheme.MakeText("Title", infoInside, "", 50f, true, MuralTheme.Gold);
+        infoTitle = MuralTheme.MakeText("Title", infoInside, "", 48f, true, MuralTheme.Gold);
         infoTitle.alignment = TextAlignmentOptions.Left;
         MuralTheme.PinTop(infoTitle.rectTransform, 84f, 80f, 44f);
+        infoTitle.rectTransform.offsetMax = new Vector2(-230f, infoTitle.rectTransform.offsetMax.y);
         infoTitle.enableAutoSizing = true;
-        infoTitle.fontSizeMin = 34f;
-        infoTitle.fontSizeMax = 50f;
+        infoTitle.fontSizeMin = 32f;
+        infoTitle.fontSizeMax = 48f;
 
-        infoBody = MuralTheme.MakeText("Body", infoInside, "", 36f, false, MuralTheme.Bone);
+        Button close = MuralTheme.MakeButton("CloseButton", infoInside, "Close", false, HideInfo);
+        RectTransform closeRect = (RectTransform)close.transform;
+        closeRect.anchorMin = new Vector2(1f, 1f);
+        closeRect.anchorMax = new Vector2(1f, 1f);
+        closeRect.pivot = new Vector2(1f, 1f);
+        closeRect.sizeDelta = new Vector2(180f, 80f);
+        closeRect.anchoredPosition = new Vector2(-30f, -84f);
+        close.GetComponentInChildren<TMP_Text>().fontSize = 34f;
+
+        // The story scrolls inside the panel when it is longer than the panel.
+        RectTransform viewport = MuralTheme.MakeRect("Viewport", infoInside);
+        MuralTheme.Stretch(viewport, 44f, 180f, 44f, 30f);
+        viewport.gameObject.AddComponent<RectMask2D>();
+        Image dragArea = viewport.gameObject.AddComponent<Image>();
+        dragArea.color = new Color(0f, 0f, 0f, 0f);
+
+        infoBody = MuralTheme.MakeText("Body", viewport, "", 32f, false, MuralTheme.Bone);
         infoBody.alignment = TextAlignmentOptions.TopLeft;
-        MuralTheme.Stretch(infoBody.rectTransform, 44f, 176f, 44f, 34f);
-        // Long stories shrink to fit inside the panel instead of running out of it.
-        infoBody.enableAutoSizing = true;
-        infoBody.fontSizeMin = 24f;
-        infoBody.fontSizeMax = 36f;
+        RectTransform bodyRect = infoBody.rectTransform;
+        bodyRect.anchorMin = new Vector2(0f, 1f);
+        bodyRect.anchorMax = new Vector2(1f, 1f);
+        bodyRect.pivot = new Vector2(0.5f, 1f);
+        bodyRect.offsetMin = new Vector2(0f, 0f);
+        bodyRect.offsetMax = new Vector2(0f, 0f);
+        ContentSizeFitter fitter = infoBody.gameObject.AddComponent<ContentSizeFitter>();
+        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        infoScroll = viewport.gameObject.AddComponent<ScrollRect>();
+        infoScroll.viewport = viewport;
+        infoScroll.content = bodyRect;
+        infoScroll.horizontal = false;
+        infoScroll.vertical = true;
+        infoScroll.movementType = ScrollRect.MovementType.Clamped;
+        infoScroll.scrollSensitivity = 30f;
     }
 }

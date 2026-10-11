@@ -193,7 +193,8 @@ public class MuralAppUI : MonoBehaviour
 
     private void OnAboutPressed()
     {
-        if (aboutOpen)
+        // The panel's own Close button may have closed it already.
+        if (aboutOpen && infoPanel != null && infoPanel.IsInfoOpen)
         {
             CloseAbout();
             return;
