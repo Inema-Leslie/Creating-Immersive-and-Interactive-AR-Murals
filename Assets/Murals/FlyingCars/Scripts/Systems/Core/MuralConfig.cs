@@ -16,6 +16,19 @@ namespace MuralAR
         [Tooltip("Measured height / width of the painted area (8.2 m / 5.4 m). The photo, taken from below, looks taller (1.62).")]
         public float imageHeightToWidth = 8.2f / 5.4f;
 
+        [Header("Words shown in the mural's UI")]
+        [Tooltip("The short story on this mural's card in the Murals gallery.")]
+        [TextArea(4, 10)]
+        public string muralStory =
+            "Amanirenas was a warrior queen of Kush who led her people with courage. In this AR experience, her spirit waits on the wall beside two painted cars. " +
+            "Point your phone at the mural and the cars wake up and fly off the wall. Call her, and a golden portal opens: Amanirenas steps out and the courtyard becomes a savanna, " +
+            "where she tells her story as night falls and fireflies rise. When she finishes, you are back in the courtyard, and she stays to greet you.";
+
+        [Tooltip("Shown by the 'How to call AMANIRENAS' button.")]
+        [TextArea(3, 6)]
+        public string howToCall =
+            "Tap the painted woman in the middle of the mural. A golden portal will open and AMANIRENAS will step out to meet you.";
+
         [Header("Tracking loss (the framework reports it; these set what our content does)")]
         [Tooltip("Loss shorter than this: content holds its last position, nothing changes.")]
         public float lossHoldSeconds = 2f;

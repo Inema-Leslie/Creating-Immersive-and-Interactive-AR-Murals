@@ -19,6 +19,7 @@ namespace MuralAR
         int _next;
         float _pauseUntil;
         bool _active;
+        bool _pointed;
         Vector3 _landing;
 
         void OnEnable()
@@ -38,6 +39,8 @@ namespace MuralAR
             _active = woman.Woman != null && config.womanWanderPoints.Length > 0;
             if (woman.Woman != null) _landing = woman.Woman.position;
             _step = Step.Waiting;
+            _pointed = false;
+            woman.Wave();
             _next = 0;
         }
 
@@ -45,7 +48,8 @@ namespace MuralAR
         {
             if (!_active || woman.Woman == null) return;
             _step = Step.Home;
-            woman.Motion.Walking = true;
+            woman.SetTalking(false);
+            woman.SetWalking(true);
         }
 
         void Update()
@@ -57,6 +61,7 @@ namespace MuralAR
             switch (_step)
             {
                 case Step.Waiting:
+                    woman.SetTalking(true);
                     FaceAudience(her, dt);
                     if (story.Elapsed >= config.womanWanderStartSeconds) _step = Step.Turning;
                     break;
@@ -67,7 +72,8 @@ namespace MuralAR
                     if (TurnTowards(her, to, dt) < 5f)
                     {
                         _step = Step.Walking;
-                        woman.Motion.Walking = true;
+                        woman.SetTalking(false);
+                        woman.SetWalking(true);
                     }
                     break;
                 }
@@ -80,7 +86,7 @@ namespace MuralAR
                     if (to.magnitude <= step)
                     {
                         Place(her, target);
-                        woman.Motion.Walking = false;
+                        woman.SetWalking(false);
                         _pauseUntil = story.Elapsed + Random.Range(config.womanPauseSeconds.x, config.womanPauseSeconds.y);
                         _next = (_next + 1) % config.womanWanderPoints.Length;
                         _step = Step.Pausing;
@@ -100,8 +106,9 @@ namespace MuralAR
                     if (to.magnitude <= step)
                     {
                         her.position = _landing;
-                        woman.Motion.Walking = false;
+                        woman.SetWalking(false);
                         _step = Step.Done;
+                        woman.Celebrate();
                     }
                     else
                     {
@@ -118,6 +125,12 @@ namespace MuralAR
                     break;
 
                 case Step.Pausing:
+                    woman.SetTalking(true);
+                    if (!_pointed && story.Elapsed >= config.nightFallsAtSeconds)
+                    {
+                        _pointed = true;
+                        woman.Point();
+                    }
                     FaceAudience(her, dt);
                     if (story.Elapsed >= _pauseUntil) _step = Step.Turning;
                     break;

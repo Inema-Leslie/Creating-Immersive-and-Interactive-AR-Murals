@@ -8,6 +8,7 @@ namespace MuralAR
         static readonly int DissolveId = Shader.PropertyToID("_Dissolve");
 
         Renderer[] _renderers;
+        bool[] _dissolves;
         MaterialPropertyBlock _block;
 
         public float Amount { get; private set; }
@@ -15,6 +16,12 @@ namespace MuralAR
         void Awake()
         {
             _renderers = GetComponentsInChildren<Renderer>(true);
+            _dissolves = new bool[_renderers.Length];
+            for (int i = 0; i < _renderers.Length; i++)
+            {
+                var material = _renderers[i].sharedMaterial;
+                _dissolves[i] = material != null && material.HasProperty(DissolveId);
+            }
             _block = new MaterialPropertyBlock();
         }
 
@@ -22,8 +29,14 @@ namespace MuralAR
         {
             if (_renderers == null) Awake();
             Amount = Mathf.Clamp01(amount);
-            foreach (var r in _renderers)
+            for (int i = 0; i < _renderers.Length; i++)
             {
+                var r = _renderers[i];
+                if (!_dissolves[i])
+                {
+                    r.enabled = Amount < 0.5f;
+                    continue;
+                }
                 r.GetPropertyBlock(_block);
                 _block.SetFloat(DissolveId, Amount);
                 r.SetPropertyBlock(_block);

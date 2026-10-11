@@ -104,6 +104,14 @@ namespace MuralAR.Tests
             float height = Height(_woman.Woman.gameObject);
             Assert.AreEqual(_config.womanHeightMeters, height, 0.15f, "she should be life size");
 
+            var animator = _woman.Woman.GetComponentInChildren<Animator>();
+            Assert.IsNotNull(animator, "she should be rigged and animated");
+            Assert.IsNotNull(animator.runtimeAnimatorController, "she should have her animation controller");
+            var hand = animator.GetBoneTransform(HumanBodyBones.RightHand);
+            var handBefore = hand.position - _woman.Woman.position;
+            yield return new WaitForSeconds(0.6f);
+            Assert.Greater(Vector3.Distance(handBefore, hand.position - _woman.Woman.position), 0.002f, "her animation isn't moving her");
+
             yield return null;
             Assert.IsTrue(_savanna.IsActive);
             Assert.IsTrue(_story.IsPlaying, "she should start speaking as the savanna appears");
@@ -120,9 +128,12 @@ namespace MuralAR.Tests
             Time.timeScale = StoryTimeScale;
             int lastShot = _cinematic.ShotIndex;
             float furthestWalk = 0f;
+            var statesSeen = new System.Collections.Generic.HashSet<string>();
             while (_experience.State != ExperienceState.Complete)
             {
                 furthestWalk = Mathf.Max(furthestWalk, Vector3.Distance(_woman.Woman.position, landing));
+                foreach (var state in new[] { "Walk", "Talk", "Wave", "Point" })
+                    if (animator.GetCurrentAnimatorStateInfo(0).IsName(state)) statesSeen.Add(state);
                 if (_cinematic.ShotIndex != lastShot)
                 {
                     lastShot = _cinematic.ShotIndex;
@@ -140,6 +151,9 @@ namespace MuralAR.Tests
                 yield return null;
             }
             Assert.Greater(furthestWalk, 1f, "she should walk around while she speaks");
+            TestContext.WriteLine("Animations played: " + string.Join(", ", statesSeen));
+            foreach (var state in new[] { "Walk", "Talk", "Wave", "Point" })
+                Assert.IsTrue(statesSeen.Contains(state), $"her {state} animation never played");
 
             Time.timeScale = 1f;
             yield return WaitUntil(() => !_cinematic.IsFilming, _config.cinematicReturnSeconds + 2f, "the cinematic camera never handed back");

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using MuralAR;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -12,6 +13,7 @@ public class FlyingCarsMural : MuralExperience, IMuralHost
     public MuralTracker tracker;
     public ExperienceController experience;
     public WomanController woman;
+    public FlyingCarsUI ui;
 
     private bool framePaused;
 
@@ -37,6 +39,7 @@ public class FlyingCarsMural : MuralExperience, IMuralHost
         }
 
         woman.OnTapAreaCreated += MarkTappable;
+        ui.CardsRequested += BuildCards;
         experience.OnStateChanged += HandleState;
         systems.SetActive(true);
     }
@@ -44,6 +47,7 @@ public class FlyingCarsMural : MuralExperience, IMuralHost
     private void OnDestroy()
     {
         woman.OnTapAreaCreated -= MarkTappable;
+        ui.CardsRequested -= BuildCards;
         experience.OnStateChanged -= HandleState;
     }
 
@@ -61,6 +65,7 @@ public class FlyingCarsMural : MuralExperience, IMuralHost
 
     public override void PlayIntro()
     {
+        HideInfo();
         tracker.ReportFound();
     }
 
@@ -71,6 +76,7 @@ public class FlyingCarsMural : MuralExperience, IMuralHost
             framePaused = false;
             base.OnTrackingFound();
         }
+        HideInfo();
         tracker.ReportFound();
     }
 
@@ -97,6 +103,53 @@ public class FlyingCarsMural : MuralExperience, IMuralHost
             framePaused = false;
             base.OnTrackingFound();
         }
+
+        switch (state)
+        {
+            case ExperienceState.Awakening: ShowCaption(0); break;
+            case ExperienceState.CarsActive: ShowCaption(1); break;
+            case ExperienceState.WomanEmerging: ShowCaption(2); break;
+            case ExperienceState.Savanna: ShowCaption(3); break;
+            case ExperienceState.Complete: ShowCaption(4); break;
+        }
+    }
+
+    private IReadOnlyList<MuralCard> BuildCards()
+    {
+        List<MuralCard> cards = new List<MuralCard>();
+        MuralSpawner source = spawner != null ? spawner : FindAnyObjectByType<MuralSpawner>();
+        List<MuralData> murals = source != null ? source.murals : new List<MuralData>();
+        if (data != null && !murals.Contains(data))
+        {
+            murals = new List<MuralData>(murals) { data };
+        }
+
+        foreach (MuralData mural in murals)
+        {
+            if (mural == null)
+            {
+                continue;
+            }
+            List<string> kinds = new List<string>();
+            if (mural.transformations != null)
+            {
+                foreach (TransformationType kind in mural.transformations)
+                {
+                    kinds.Add(kind.ToString());
+                }
+            }
+            cards.Add(new MuralCard
+            {
+                title = string.IsNullOrEmpty(mural.displayTitle) ? mural.imageName : mural.displayTitle,
+                location = mural.location,
+                about = mural.description,
+                whatHappens = string.Join(", ", kinds),
+                whereToStand = mural.scanHint,
+                isThisMural = mural == data,
+                story = mural == data ? tracker.Config.muralStory : null,
+            });
+        }
+        return cards;
     }
 
     private void MarkTappable(GameObject target, string id)

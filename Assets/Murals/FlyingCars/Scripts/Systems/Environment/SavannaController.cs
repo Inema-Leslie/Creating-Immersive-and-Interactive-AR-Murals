@@ -79,9 +79,21 @@ namespace MuralAR
             _trees.CopyTo(_seated, 0);
             fireflies.CopyTo(_seated, _trees.Length);
             _seatOffsets = new float[_seated.Length];
-            for (int i = 0; i < _seated.Length; i++) _seatOffsets[i] = _seated[i].position.y - GroundAt(_seated[i].position);
+            for (int i = 0; i < _seated.Length; i++) _seatOffsets[i] = SeatOffset(_seated[i]);
             savannaRoot.SetActive(false);
             SetFlash(0f);
+        }
+
+        float SeatOffset(Transform item)
+        {
+            if (_terrains.Length == 0) return 0f;
+            var root = savannaRoot.transform;
+            var terrain = _terrains[0];
+            var local = root.InverseTransformPoint(item.position);
+            var origin = root.InverseTransformPoint(terrain.transform.position);
+            var size = terrain.terrainData.size;
+            float height = terrain.terrainData.GetInterpolatedHeight((local.x - origin.x) / size.x, (local.z - origin.z) / size.z);
+            return local.y - (origin.y + height);
         }
 
         Transform[] Children(string group)
